@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<!-- saved from url=(0041)http://www.itdadao.com/2016/03/14/583472/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link rel="dns-prefetch" href="http://apps.bdimg.com/">
+<meta http-equiv="X-UA-Compatible" content="IE=11,IE=10,IE=9,IE=8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-title" content="IT大道">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+<title>集体智慧编程——垃圾邮件过滤器（贝叶斯）-Python实现 - IT大道</title>
+
+<!-- This site is optimized with the Yoast SEO plugin v3.1.2 - https://yoast.com/wordpress/plugins/seo/ -->
+<link rel="canonical" href="http://www.itdadao.com/2016/03/14/583472/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="集体智慧编程——垃圾邮件过滤器（贝叶斯）-Python实现 - IT大道">
+<meta property="og:description" content="介绍垃圾邮件分类器的设计与实现，分为一下几个步骤： 特征提取： 将训练样本的正文切分为特征，如果是英文，直接按照空格切分，每个词可以作为一个特征；如果是中文，则需要借助分词器，如jieba分词器等。切分后，将词和所属类别建立一个字典存储。字 …">
+<meta property="og:url" content="http://www.itdadao.com/2016/03/14/583472/">
+<meta property="og:site_name" content="IT大道">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="垃圾邮件分类">
+<meta property="article:tag" content="数据挖掘">
+<meta property="article:tag" content="贝叶斯分类器">
+<meta property="article:section" content="技术">
+<meta property="article:published_time" content="2016-03-14T16:11:46+08:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:description" content="介绍垃圾邮件分类器的设计与实现，分为一下几个步骤： 特征提取： 将训练样本的正文切分为特征，如果是英文，直接按照空格切分，每个词可以作为一个特征；如果是中文，则需要借助分词器，如jieba分词器等。切分后，将词和所属类别建立一个字典存储。字 […]">
+<meta name="twitter:title" content="集体智慧编程——垃圾邮件过滤器（贝叶斯）-Python实现 - IT大道">
+<!-- / Yoast SEO plugin. -->
+
+<link rel="stylesheet" id="_bootstrap-css" href="./集体智慧编程——垃圾邮件过滤器Python实现_files/bootstrap.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="_fontawesome-css" href="./集体智慧编程——垃圾邮件过滤器Python实现_files/font-awesome.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="_main-css" href="./集体智慧编程——垃圾邮件过滤器Python实现_files/main.css" type="text/css" media="all">
+<link rel="https://api.w.org/" href="http://www.itdadao.com/wp-json/">
+<link rel="shortlink" href="http://www.itdadao.com/?p=583472">
+<link rel="alternate" type="application/json+oembed" href="http://www.itdadao.com/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fwww.itdadao.com%2F2016%2F03%2F14%2F583472%2F">
+<link rel="alternate" type="text/xml+oembed" href="http://www.itdadao.com/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fwww.itdadao.com%2F2016%2F03%2F14%2F583472%2F&amp;format=xml">
+<meta name="keywords" content="Python, 垃圾邮件分类, 数据挖掘, 贝叶斯分类器, 技术">
+<meta name="description" content="介绍垃圾邮件分类器的设计与实现，分为一下几个步骤：   特征提取：  将训练样本的正文切分为特征，如果是英文，直接按照空格切分，每个词可以作为一个特征；如果是中文，则需要借助分词器，如jieba分词器等。切分后，将词和所属类别建立一个字典存储。字典的结构是：  {word1:{class1:count1, class2:count2}, word2:{cla">
+<style>.container{max-width:1140px}</style><link rel="shortcut icon" href="http://static.itdadao.com/img/favicon.ico">
+<!--[if lt IE 9]><script src="http://www.itdadao.com/wp-content/themes/dux/js/libs/html5.min.js"></script><![endif]-->
+
+<script async="" data-requirecontext="_" data-requiremodule="main" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/main.js"></script><script src="./集体智慧编程——垃圾邮件过滤器Python实现_files/share.js"></script><link href="./集体智慧编程——垃圾邮件过滤器Python实现_files/share.css" rel="styleSheet" type="text/css"><script async="" data-requirecontext="_" data-requiremodule="prettyprint" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/prettyprint.js"></script><script async="" data-requirecontext="_" data-requiremodule="signpop" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/signpop.js"></script><script async="" data-requirecontext="_" data-requiremodule="comment" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/comment.js"></script></head>
+<body class="single single-post postid-583472 single-format-standard comment-open site-layout-2">
+<header class="header">
+	<div class="container">
+		<div class="logo"><a href="http://www.itdadao.com/" title="IT大道-个性化IT阅读社区"><img src="./集体智慧编程——垃圾邮件过滤器Python实现_files/logo.png">IT大道</a></div>		<div class="brand">个性化IT阅读社区
+<br>我们一直在努力</div>		<ul class="site-nav site-navbar">
+			<li id="menu-item-6" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-6"><a href="http://www.itdadao.com/design/">设计</a></li>
+<li id="menu-item-438954" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-438954"><a href="http://www.itdadao.com/tech-article/">技术</a></li>
+<li id="menu-item-454048" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-454048"><a href="http://www.itdadao.com/news-article/">资讯</a></li>
+<li id="menu-item-8" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-8"><a href="http://www.itdadao.com/market/">运营</a></li>
+<li id="menu-item-4" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-4"><a href="http://www.itdadao.com/enterprise/">创业</a></li>
+							<li class="navto-search"><a href="javascript:;" class="search-show active"><i class="fa fa-search"></i></a></li>
+					</ul>
+		<div class="topbar">
+			<ul class="site-nav topmenu">
+				<li class="page_item page-item-456676"><a href="http://www.itdadao.com/topic/">专题</a></li><li class="page_item page-item-2983"><a href="http://www.itdadao.com/user-info/">会员中心</a></li><li class="page_item page-item-2846"><a href="http://www.itdadao.com/tags/">所有标签</a></li><li class="page_item page-item-2985"><a href="http://www.itdadao.com/reset-password/">找回密码</a></li><li class="page_item page-item-711218"><a href="http://www.itdadao.com/%e9%a6%96%e9%a1%b5/">首页</a></li>
+				<li class="menusns">
+					<a href="javascript:;">关注本站 <i class="fa fa-angle-down"></i></a>
+					<ul class="sub-menu">
+						
+						<li><a target="_blank" href="http://www.itdadao.com/feed/"><i class="fa fa-rss"></i> RSS订阅</a></li>					</ul>
+				</li>
+			</ul>
+											<a href="javascript:;" class="signin-loader">Hi, 请登录</a>
+				&nbsp; &nbsp; <a href="javascript:;" class="signup-loader">我要注册</a>
+				&nbsp; &nbsp; <a href="http://www.itdadao.com/reset-password/">找回密码</a>
+					</div>
+		<i class="fa fa-bars m-icon-nav"></i>
+	</div>
+</header>
+<div class="site-search">
+	<div class="container">
+		<form method="get" class="site-search-form" action="http://www.itdadao.com/"><input class="search-input" name="s" type="text" placeholder="输入关键字" value=""><button class="search-btn" type="submit"><i class="fa fa-search"></i></button></form>	</div>
+</div>
+<section class="container">
+	<div class="content-wrap">
+	<div class="content">
+				<header class="article-header">
+			<h1 class="article-title"><a href="http://www.itdadao.com/2016/03/14/583472/">集体智慧编程——垃圾邮件过滤器（贝叶斯）-Python实现</a></h1>
+			<div class="article-meta">
+				<span class="item">2016-03-14 16:11</span>
+								<span class="item">来源：<a href="http://blog.csdn.net/bcj296050240/article/details/50886582?utm_source=itdadao&amp;utm_medium=referral" target="_blank" rel="external nofollow">http://blog.csdn.net/bcj296050240/article/details/50886582</a></span>				<span class="item">分类：<a href="http://www.itdadao.com/tech-article/" rel="category tag">技术</a></span>
+								
+				<span class="item">评论(0)</span>
+				<span class="item"></span>
+			</div>
+		</header>
+		<article class="article-content">
+			<div class="asb asb-post asb-post-01"><script src="./集体智慧编程——垃圾邮件过滤器Python实现_files/hm.js"></script><script src="./集体智慧编程——垃圾邮件过滤器Python实现_files/ca-pub-8722128765990495.js"></script><script async="" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/adsbygoogle.js"></script>
+<!-- 728x90 -->
+<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-8722128765990495" data-ad-slot="2286421424" data-adsbygoogle-status="done"><ins id="aswift_0_expand" style="display:inline-table;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent"><ins id="aswift_0_anchor" style="display:block;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent"><iframe width="728" height="90" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" onload="var i=this.id,s=window.google_iframe_oncopy,H=s&amp;&amp;s.handlers,h=H&amp;&amp;H[i],w=this.contentWindow,d;try{d=w.document}catch(e){}if(h&amp;&amp;d&amp;&amp;(!d.body||!d.body.firstChild)){if(h.call){setTimeout(h,0)}else if(h.match){try{h=s.upd(h,i)}catch(e){}w.location.replace(h)}}" id="aswift_0" name="aswift_0" style="left: 0px; position: absolute; top: 0px; height: 90px;"></iframe></ins></ins></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>			<p>介绍垃圾邮件分类器的设计与实现，分为一下几个步骤：</p>
+<ul>
+<li>
+<p><strong>特征提取：</strong> <br>
+将训练样本的正文切分为特征，如果是英文，直接按照空格切分，每个词可以作为一个特征；如果是中文，则需要借助分词器，如jieba分词器等。切分后，将词和所属类别建立一个字典存储。字典的结构是： <br>
+{word1:{class1:count1, class2:count2}, word2:{class1:count1, class2:count2}…}</p>
+</li>
+<li>
+<p><strong>训练数据：</strong> <br>
+依次读取每条训练数据，按照上述方法将句子切分为单词，以切分好的单词作为特征，维护字典。</p>
+</li>
+<li>
+<p><strong>计算概率：</strong> <br>
+这也是贝叶斯分类器的核心内容，计算特征F在类别cat中出现的概率： <br>
+P（f | cat） = P(f, cat) / P(cat) <br>
+即为：词与该类别共同出现的文章数 / 该类别的文章总数</p>
+</li>
+<li>
+<p><strong>计算整篇文档的概率：</strong> <br>
+P（document | class1） = P(word1 | class1) * P(word2 | class2) * P(word3 | class3) …. <br>
+这个假设是基于朴素贝叶斯中个特征条件独立的假设，具体的关于朴素贝叶斯的只是可以参见《统计学习方法》相关章节。 <br>
+  下一步根据贝叶斯公式： <br>
+P(class1 | document) = P(document | class1) * P(class1) / P(document)</p>
+</li>
+<li>
+<p><strong>选择分类：</strong> <br>
+根据不同的结构风险，设定阈值，决定将文档归于哪一类。 <br>
+在垃圾邮件分类的问题中，可以看到，如果将一封垃圾邮件错误的判定为非垃圾邮件，则没有什么损失，用户顶多看到邮箱里有一封垃圾邮件而已；相反，若把一封非垃圾邮件判定为垃圾邮件而直接扔进了垃圾箱，则用户遭受的损失将会很大，因为可能错过了很重要的信息。故而误判的风险是不一样的。 <br>
+此处，假设垃圾邮件的类别为“+”，非垃圾邮件的类别为“-”。 <br>
+我们首先分别计算 P(+ | document)和P（- | document）.如果属于+类的概率较大，即更有可能属于垃圾邮件。这时，我们应该设定一个阈值 T，如果 P（+|document）&gt; T * P(- | document)时，我们才将这封邮件当成垃圾邮件（如T = 3.0）。则在这种情况下，正常邮件被误判为垃圾邮件的概率将大大下降，整个算法的结构化风险将会更小。</p>
+</li>
+<li>
+<p><strong>将经过训练的分类器持久化：</strong> <br>
+即：使用数据库保存和维护字典，而非在程序开始时再读取训练数据进行特征提取和训练。这样可以一次训练，多次使用。此处可以用自己喜欢的任何数据库，如SQLITE和Mysql等。</p>
+</li>
+<li>
+<p><strong>改进特征提取的方法：</strong> <br>
+1）标题中的单词单独作为特征，添加标志，如前面加“title_”。 <br>
+2）摘要中的单词单独作为特征，添加标志，如前面加“summary_”。 <br>
+3）统计大写单词的数目，多于一定比例，则新增一个标志作为特征。 <br>
+4）相邻单词组合为词组作为特征。</p>
+</li>
+</ul>
+<p><strong>以下是程序源码：</strong></p>
+<pre class="prettyprint"><span class="com"># -*- coding: utf-8 -*-</span><span class="pln">
+__author__ </span><span class="pun">=</span><span class="pln"> </span><span class="str">'Bai Chenjia'</span><span class="pln">
+
+</span><span class="kwd">import</span><span class="pln"> re
+</span><span class="kwd">import</span><span class="pln"> math
+</span><span class="kwd">from</span><span class="pln"> sqlite3 </span><span class="kwd">import</span><span class="pln"> dbapi2 </span><span class="kwd">as</span><span class="pln"> sqlite
+
+
+</span><span class="com"># 该函数用于提取特征，将doc中所有不重复的单词提取作为doc的特征</span><span class="pln">
+</span><span class="kwd">def</span><span class="pln"> getwords</span><span class="pun">(</span><span class="pln">doc</span><span class="pun">):</span><span class="pln">
+    </span><span class="com"># 正则表达式，按照非单词字符将句子切分</span><span class="pln">
+    splitter </span><span class="pun">=</span><span class="pln"> re</span><span class="pun">.</span><span class="pln">compile</span><span class="pun">(</span><span class="pln">r</span><span class="str">'\W*'</span><span class="pun">)</span><span class="pln">
+    </span><span class="com"># 根据非字母字符进行单词切分</span><span class="pln">
+    words </span><span class="pun">=</span><span class="pln"> </span><span class="pun">[</span><span class="pln">s</span><span class="pun">.</span><span class="pln">lower</span><span class="pun">()</span><span class="pln"> </span><span class="kwd">for</span><span class="pln"> s </span><span class="kwd">in</span><span class="pln"> splitter</span><span class="pun">.</span><span class="pln">split</span><span class="pun">(</span><span class="pln">doc</span><span class="pun">)</span><span class="pln"> </span><span class="kwd">if</span><span class="pln"> len</span><span class="pun">(</span><span class="pln">s</span><span class="pun">)</span><span class="pln"> </span><span class="pun">&gt;</span><span class="pln"> </span><span class="lit">2</span><span class="pln"> </span><span class="kwd">and</span><span class="pln"> len</span><span class="pun">(</span><span class="pln">s</span><span class="pun">)</span><span class="pln"> </span><span class="pun">&lt;</span><span class="pln"> </span><span class="lit">20</span><span class="pun">]</span><span class="pln">
+    </span><span class="com"># 返回一组不重复的单词</span><span class="pln">
+    </span><span class="kwd">return</span><span class="pln"> dict</span><span class="pun">([</span><span class="pln">w</span><span class="pun">,</span><span class="pln"> </span><span class="lit">1</span><span class="pun">]</span><span class="pln"> </span><span class="kwd">for</span><span class="pln"> w </span><span class="kwd">in</span><span class="pln"> words</span><span class="pun">)</span><span class="pln">
+
+
+</span><span class="com"># 一次训练多条数据，其参数cl是类 classifier 的一个对象</span><span class="pln">
+</span><span class="kwd">def</span><span class="pln"> sampletrain</span><span class="pun">(</span><span class="pln">cl</span><span class="pun">):</span><span class="pln">
+    cl</span><span class="pun">.</span><span class="pln">train</span><span class="pun">(</span><span class="str">'Nobody owns the water.'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'good'</span><span class="pun">)</span><span class="pln">
+    cl</span><span class="pun">.</span><span class="pln">train</span><span class="pun">(</span><span class="str">'the quick rabbit jumps fences'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'good'</span><span class="pun">)</span><span class="pln">
+    cl</span><span class="pun">.</span><span class="pln">train</span><span class="pun">(</span><span class="str">'buy pharmaceuticals now'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'bad'</span><span class="pun">)</span><span class="pln">
+    cl</span><span class="pun">.</span><span class="pln">train</span><span class="pun">(</span><span class="str">'make quick money at the online casino'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'bad'</span><span class="pun">)</span><span class="pln">
+    cl</span><span class="pun">.</span><span class="pln">train</span><span class="pun">(</span><span class="str">'the quick brown fox jumps'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'good'</span><span class="pun">)</span><span class="pln">
+
+
+</span><span class="str">"""
+新建一个分类器类，用于封装分类器的所有数据和方法
+"""</span><span class="pln">
+
+
+</span><span class="kwd">class</span><span class="pln"> classifier</span><span class="pun">:</span><span class="pln">
+
+    </span><span class="kwd">def</span><span class="pln"> __init__</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> getfeatures</span><span class="pun">,</span><span class="pln"> filename</span><span class="pun">=</span><span class="kwd">None</span><span class="pun">):</span><span class="pln">
+        </span><span class="com"># 统计特征/分类组合的数量  feature_count简写fc</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">fc </span><span class="pun">=</span><span class="pln"> </span><span class="pun">{}</span><span class="pln">
+        </span><span class="com"># 统计每个分类中的文档数量 category_count简写cc</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">cc </span><span class="pun">=</span><span class="pln"> </span><span class="pun">{}</span><span class="pln">
+        </span><span class="com"># 初始化提取特征的方法函数</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">getfeatures </span><span class="pun">=</span><span class="pln"> getfeatures
+
+    </span><span class="str">"""
+    以下 6 个函数全部改用sqlite数据库操作，全部重写
+    """</span><span class="pln">
+    </span><span class="str">"""
+    # 增加 特征f，属于类别cat，增加相应的字典计数值
+    def incf(self, f, cat):
+        # 若不存在该键，则新建，其值为空的dict
+        self.fc.setdefault(f, {})
+        self.fc[f].setdefault(cat, 0)
+        # 对应的值增加1
+        self.fc[f][cat] += 1
+
+    # 增加字典 cc 对应的位置的值
+    def incc(self, cat):
+        self.cc.setdefault(cat, 0)
+        self.cc[cat] += 1
+
+    # 从self.fc表中提取某一特征出现与某一分类中的次数
+    def fcount(self, f, cat):
+        if f in self.fc.keys():
+            if cat in self.fc[f].keys():
+                return self.fc[f][cat]
+        return 0
+
+    # 从self.cc表中提取属于某一分类的文档数目
+    def catcount(self, cat):
+        if cat in self.cc.keys():
+            return self.cc[cat]
+        return 0
+
+    # 所有文档的数目
+    def totalcount(self):
+        return sum([self.cc[cat] for cat in self.cc.keys()])
+
+    # 所有分类的列表
+    def categories(self):
+        return self.cc.keys()
+    """</span><span class="pln">
+
+    </span><span class="str">"""
+    以下是对上述 6 个函数用数据库操作重写后的函数
+    """</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> setdb</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> dbfile</span><span class="pun">):</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con </span><span class="pun">=</span><span class="pln"> sqlite</span><span class="pun">.</span><span class="pln">connect</span><span class="pun">(</span><span class="pln">dbfile</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'create table if not exists fc(feature, categories, count)'</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'create table if not exists cc(categories, count)'</span><span class="pun">)</span><span class="pln">
+
+    </span><span class="kwd">def</span><span class="pln"> incf</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        res </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select count from fc where feature="%s" and categories="%s"'</span><span class="pln"> </span><span class="pun">%</span><span class="pln"> </span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">)).</span><span class="pln">fetchone</span><span class="pun">()</span><span class="pln">
+        </span><span class="com"># 如果没有找到这条记录则插入</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> res </span><span class="pun">==</span><span class="pln"> </span><span class="kwd">None</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'insert into fc (feature, categories, count) values ("%s", "%s", 1)'</span><span class="pln"> </span><span class="pun">%</span><span class="pln"> </span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">))</span><span class="pln">
+        </span><span class="kwd">else</span><span class="pun">:</span><span class="pln">
+            count </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="pln">res</span><span class="pun">[</span><span class="lit">0</span><span class="pun">])</span><span class="pln">
+            </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'update fc set count=%d where feature="%s" and categories="%s"'</span><span class="pln"> </span><span class="pun">%</span><span class="pln"> </span><span class="pun">(</span><span class="pln">count</span><span class="pun">+</span><span class="lit">1</span><span class="pun">,</span><span class="pln"> f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">))</span><span class="pln">
+
+    </span><span class="kwd">def</span><span class="pln"> incc</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        res </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select count from cc where categories="%s"'</span><span class="pln"> </span><span class="pun">%</span><span class="pln"> cat</span><span class="pun">).</span><span class="pln">fetchone</span><span class="pun">()</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> res </span><span class="kwd">is</span><span class="pln"> </span><span class="kwd">None</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'insert into cc (categories, count) values ("%s", 1)'</span><span class="pln"> </span><span class="pun">%</span><span class="pln"> cat</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">else</span><span class="pun">:</span><span class="pln">
+            count </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="pln">res</span><span class="pun">[</span><span class="lit">0</span><span class="pun">])</span><span class="pln">
+            </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'update cc set count=%d where categories="%s"'</span><span class="pln"> </span><span class="pun">%(</span><span class="pln">count</span><span class="pun">+</span><span class="lit">1</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">))</span><span class="pln">
+
+    </span><span class="kwd">def</span><span class="pln"> fcount</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        res </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select count from fc where feature="%s" and categories="%s"'</span><span class="pln"> </span><span class="pun">%</span><span class="pln"> </span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">)).</span><span class="pln">fetchone</span><span class="pun">()</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> res </span><span class="kwd">is</span><span class="pln"> </span><span class="kwd">None</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="lit">0</span><span class="pln">
+        </span><span class="kwd">else</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="pln">res</span><span class="pun">[</span><span class="lit">0</span><span class="pun">])</span><span class="pln">
+
+    </span><span class="kwd">def</span><span class="pln"> catcount</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        res </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select count from cc where categories="%s"'</span><span class="pln"> </span><span class="pun">%</span><span class="pln"> cat</span><span class="pun">).</span><span class="pln">fetchone</span><span class="pun">()</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> res </span><span class="kwd">is</span><span class="pln"> </span><span class="kwd">None</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="lit">0</span><span class="pln">
+        </span><span class="kwd">else</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="pln">res</span><span class="pun">[</span><span class="lit">0</span><span class="pun">])</span><span class="pln">
+
+    </span><span class="kwd">def</span><span class="pln"> totalcount</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">):</span><span class="pln">
+        res </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select count from cc'</span><span class="pun">).</span><span class="pln">fetchall</span><span class="pun">()</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> sum</span><span class="pun">(</span><span class="pln">res</span><span class="pun">[</span><span class="pln">i</span><span class="pun">][</span><span class="lit">0</span><span class="pun">]</span><span class="pln"> </span><span class="kwd">for</span><span class="pln"> i </span><span class="kwd">in</span><span class="pln"> range</span><span class="pun">(</span><span class="pln">len</span><span class="pun">(</span><span class="pln">res</span><span class="pun">)))</span><span class="pln">
+
+    </span><span class="kwd">def</span><span class="pln"> categories</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">):</span><span class="pln">
+        res </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select categories from cc'</span><span class="pun">).</span><span class="pln">fetchall</span><span class="pun">()</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> </span><span class="pun">[</span><span class="pln">res</span><span class="pun">[</span><span class="pln">i</span><span class="pun">][</span><span class="lit">0</span><span class="pun">]</span><span class="pln"> </span><span class="kwd">for</span><span class="pln"> i </span><span class="kwd">in</span><span class="pln"> range</span><span class="pun">(</span><span class="pln">len</span><span class="pun">(</span><span class="pln">res</span><span class="pun">))]</span><span class="pln">
+
+    </span><span class="com"># train函数接受一条训练数据，首先提取特征，随后维护self.cc和self.fc两个表</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> train</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> item</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        features </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">getfeatures</span><span class="pun">(</span><span class="pln">item</span><span class="pun">)</span><span class="pln">
+        </span><span class="com"># 维护表fc, 针对该分类为每个特征增加计数值</span><span class="pln">
+        </span><span class="kwd">for</span><span class="pln"> f </span><span class="kwd">in</span><span class="pln"> features</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">incf</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">)</span><span class="pln">
+        </span><span class="com"># 维护表cc</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">incc</span><span class="pun">(</span><span class="pln">cat</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">commit</span><span class="pun">()</span><span class="pln">
+
+    </span><span class="com"># 计算概率，计算P(f|cat)条件概率，即特征f在类别cat条件下出现的概率</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> fprob</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        </span><span class="com"># 如果该类别文档数为0则返回0</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">catcount</span><span class="pun">(</span><span class="pln">cat</span><span class="pun">)</span><span class="pln"> </span><span class="pun">==</span><span class="pln"> </span><span class="lit">0</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="lit">0</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">.</span><span class="pln">fcount</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">))</span><span class="pln"> </span><span class="pun">/</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">.</span><span class="pln">catcount</span><span class="pun">(</span><span class="pln">cat</span><span class="pun">))</span><span class="pln">
+
+    </span><span class="com"># 对fprob的条件概率计算方法进行优化，设置初始概率为0.5，权值为1</span><span class="pln">
+    </span><span class="com"># 参数： f为特征, cat为类别，prf为self.prob，weight为初始值ap所占权重</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> weightedprob</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">,</span><span class="pln"> prf</span><span class="pun">,</span><span class="pln"> weight</span><span class="pun">=</span><span class="lit">1.0</span><span class="pun">,</span><span class="pln"> ap</span><span class="pun">=</span><span class="lit">0.5</span><span class="pun">):</span><span class="pln">
+        </span><span class="com"># 计算当前条件概率</span><span class="pln">
+        basicprob </span><span class="pun">=</span><span class="pln"> prf</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">)</span><span class="pln">
+        </span><span class="com"># 统计特征在所有分类中出现的次数</span><span class="pln">
+        totals </span><span class="pun">=</span><span class="pln"> sum</span><span class="pun">([</span><span class="kwd">self</span><span class="pun">.</span><span class="pln">fcount</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> c</span><span class="pun">)</span><span class="pln"> </span><span class="kwd">for</span><span class="pln"> c </span><span class="kwd">in</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">categories</span><span class="pun">()])</span><span class="pln">
+        </span><span class="com"># 计算加权平均</span><span class="pln">
+        bp </span><span class="pun">=</span><span class="pln"> </span><span class="pun">((</span><span class="pln">weight </span><span class="pun">*</span><span class="pln"> ap</span><span class="pun">)</span><span class="pln"> </span><span class="pun">+</span><span class="pln"> </span><span class="pun">(</span><span class="pln">totals </span><span class="pun">*</span><span class="pln"> basicprob</span><span class="pun">))</span><span class="pln"> </span><span class="pun">/</span><span class="pln"> </span><span class="pun">(</span><span class="pln">weight </span><span class="pun">+</span><span class="pln"> totals</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> bp
+
+</span><span class="str">"""
+朴素贝叶斯分类器，继承自类 classifier
+贝叶斯分类器假设单词之间的出现相互独立，若要计算整片文档的概率，只需将所有出现与某篇文档中的个单词的概率相乘即可
+"""</span><span class="pln">
+
+
+</span><span class="kwd">class</span><span class="pln"> naivebayes</span><span class="pun">(</span><span class="pln">classifier</span><span class="pun">):</span><span class="pln">
+    </span><span class="com"># 初始化阈值列表为空</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> __init__</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> getfeatures</span><span class="pun">):</span><span class="pln">
+        classifier</span><span class="pun">.</span><span class="pln">__init__</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> getfeatures</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">thresholds </span><span class="pun">=</span><span class="pln"> </span><span class="pun">{}</span><span class="pln">
+
+    </span><span class="com"># 计算整片文章的属于cat类的概率  等于文章中所有单词属于cat类的条件概率之积</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> docprob</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> item</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        features </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">getfeatures</span><span class="pun">(</span><span class="pln">item</span><span class="pun">)</span><span class="pln">
+        </span><span class="com"># 将所有特征的概率相乘</span><span class="pln">
+        p </span><span class="pun">=</span><span class="pln"> </span><span class="lit">1</span><span class="pln">
+        </span><span class="kwd">for</span><span class="pln"> f </span><span class="kwd">in</span><span class="pln"> features</span><span class="pun">:</span><span class="pln">
+            p </span><span class="pun">*=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">weightedprob</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">fprob</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> p
+
+    </span><span class="com"># P(cat|item) = P(item|cat) * P(cat) / P(item) 其中p(item|cat)通过上一个函数计算得到</span><span class="pln">
+    </span><span class="com"># 其中 P(item) 这一项由于不参与比较，因此可以忽略</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> prob</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> item</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        catprob </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">.</span><span class="pln">catcount</span><span class="pun">(</span><span class="pln">cat</span><span class="pun">))</span><span class="pln"> </span><span class="pun">/</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">.</span><span class="pln">totalcount</span><span class="pun">())</span><span class="pln">
+        docprob </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">docprob</span><span class="pun">(</span><span class="pln">item</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">)</span><span class="pln"> </span><span class="pun">*</span><span class="pln"> catprob
+        </span><span class="kwd">return</span><span class="pln"> docprob
+
+    </span><span class="com"># 设置阈值</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> setthresholds</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">,</span><span class="pln"> t</span><span class="pun">):</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">thresholds</span><span class="pun">.</span><span class="pln">setdefault</span><span class="pun">(</span><span class="pln">cat</span><span class="pun">,</span><span class="pln"> </span><span class="lit">1</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">thresholds</span><span class="pun">[</span><span class="pln">cat</span><span class="pun">]</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> t
+
+    </span><span class="com"># 获取阈值</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> getthresholds</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> cat </span><span class="kwd">in</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">thresholds</span><span class="pun">.</span><span class="pln">keys</span><span class="pun">():</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">thresholds</span><span class="pun">[</span><span class="pln">cat</span><span class="pun">]</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> </span><span class="lit">1.0</span><span class="pln">
+
+    </span><span class="com"># 根据prob计算出的所有cat类的P(cat|item)进行比较，同时根据设定的thresholds阈值，将item判定到某一类</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> classify</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> item</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">default</span><span class="pun">=</span><span class="kwd">None</span><span class="pun">):</span><span class="pln">
+        </span><span class="com"># 构建(类别，概率)列表，并按照概率排序</span><span class="pln">
+        prob </span><span class="pun">=</span><span class="pln"> sorted</span><span class="pun">([(</span><span class="pln">cat</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">prob</span><span class="pun">(</span><span class="pln">item</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">))</span><span class="pln"> </span><span class="kwd">for</span><span class="pln"> cat </span><span class="kwd">in</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">categories</span><span class="pun">()],</span><span class="pln"> key</span><span class="pun">=</span><span class="kwd">lambda</span><span class="pln"> x</span><span class="pun">:</span><span class="pln"> x</span><span class="pun">[</span><span class="lit">1</span><span class="pun">],</span><span class="pln"> reverse</span><span class="pun">=</span><span class="kwd">True</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">print</span><span class="pln"> prob</span><span class="pun">[:]</span><span class="pln">
+
+        </span><span class="com"># 如果 最大概率 &gt; 阈值 * 次大概率，则判断为最大概率所属类别，否则判定为default类别</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> prob</span><span class="pun">[</span><span class="lit">0</span><span class="pun">][</span><span class="lit">1</span><span class="pun">]</span><span class="pln"> </span><span class="pun">&gt;</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">getthresholds</span><span class="pun">(</span><span class="pln">prob</span><span class="pun">[</span><span class="lit">0</span><span class="pun">][</span><span class="lit">0</span><span class="pun">])</span><span class="pln"> </span><span class="pun">*</span><span class="pln"> prob</span><span class="pun">[</span><span class="lit">1</span><span class="pun">][</span><span class="lit">1</span><span class="pun">]:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> prob</span><span class="pun">[</span><span class="lit">0</span><span class="pun">][</span><span class="lit">0</span><span class="pun">]</span><span class="pln">
+        </span><span class="kwd">else</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">default</span><span class="pln">
+
+</span><span class="str">"""
+基于 费舍尔 方法的分类器，以 classifier 作为基类 其基本思想如下：
+1.直接计算当一篇文档中出现某个特征时，该文档属于某个分类的可能性
+2.在某特征出现情况下，属于cat类的概率： P(cat|feature) = P(feature|cat) * P(cat) | P(feature)
+  其中 P(feature) = sigma[P(cat|feature). 注意此处假设 P(cat) 相等，因此不做计算，默认为1
+3.随后将文章 item 中的所有feature得到的 P(cat|feature) 连乘，取自然对数，然后倒置卡方函数求得概率
+4.加入阈值因素，比较所有cat的 P(cat|item) ，判断所属类别
+"""</span><span class="pln">
+
+
+</span><span class="kwd">class</span><span class="pln"> fisherclassifier</span><span class="pun">(</span><span class="pln">classifier</span><span class="pun">):</span><span class="pln">
+    </span><span class="com"># 设定分类概率的下限，如将bad的分类下线设置为0.6，则只有当P(bad|item)&gt;0.6时才判定为bad</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> __init__</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> getfeatures</span><span class="pun">):</span><span class="pln">
+        classifier</span><span class="pun">.</span><span class="pln">__init__</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> getfeatures</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">minimums </span><span class="pun">=</span><span class="pln"> </span><span class="pun">{}</span><span class="pln">
+
+    </span><span class="com"># 计算条件概率 P(cat|f)</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> cprob</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        </span><span class="com"># P(f|cat)</span><span class="pln">
+        clf </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">fprob</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> clf </span><span class="pun">==</span><span class="pln"> </span><span class="lit">0</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="lit">0</span><span class="pln">
+
+        </span><span class="com"># P(f): 特征在所有分类中出现的频率</span><span class="pln">
+        freqsum </span><span class="pun">=</span><span class="pln"> sum</span><span class="pun">([</span><span class="kwd">self</span><span class="pun">.</span><span class="pln">fprob</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> c</span><span class="pun">)</span><span class="pln"> </span><span class="kwd">for</span><span class="pln"> c </span><span class="kwd">in</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">categories</span><span class="pun">()])</span><span class="pln">
+
+        </span><span class="com"># 概率等于特征在该分类中出现的频率除以总体概率</span><span class="pln">
+        p </span><span class="pun">=</span><span class="pln"> clf </span><span class="pun">/</span><span class="pln"> freqsum
+        </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="pln">p</span><span class="pun">)</span><span class="pln">
+
+    </span><span class="com"># 求一篇文档item的概率</span><span class="pln">
+    </span><span class="com"># 将各特征的概率值组合起来，连乘，然后去自然对数，再讲所得结果乘以-2，最后利用倒置对数卡方函数求得概率</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> fisherprob</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> item</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        </span><span class="com"># 将所有概率值相乘</span><span class="pln">
+        p </span><span class="pun">=</span><span class="pln"> </span><span class="lit">1.0</span><span class="pln">
+        features </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">getfeatures</span><span class="pun">(</span><span class="pln">item</span><span class="pun">)</span><span class="pln">
+        </span><span class="kwd">for</span><span class="pln"> f </span><span class="kwd">in</span><span class="pln"> features</span><span class="pun">:</span><span class="pln">
+            </span><span class="com"># 加入初始权值，计算概率</span><span class="pln">
+            p </span><span class="pun">*=</span><span class="pln"> </span><span class="pun">(</span><span class="kwd">self</span><span class="pun">.</span><span class="pln">weightedprob</span><span class="pun">(</span><span class="pln">f</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">cprob</span><span class="pun">))</span><span class="pln">
+            </span><span class="com">#print p</span><span class="pln">
+
+        </span><span class="com"># 取自然对数，乘-2</span><span class="pln">
+        fscore </span><span class="pun">=</span><span class="pln"> </span><span class="pun">-</span><span class="lit">2.0</span><span class="pln"> </span><span class="pun">*</span><span class="pln"> math</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="pln">p</span><span class="pun">)</span><span class="pln">
+
+        </span><span class="com"># 对数卡方函数</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">invchi2</span><span class="pun">(</span><span class="pln">fscore</span><span class="pun">,</span><span class="pln"> len</span><span class="pun">(</span><span class="pln">features</span><span class="pun">)</span><span class="pln"> </span><span class="pun">*</span><span class="pln"> </span><span class="lit">2</span><span class="pun">)</span><span class="pln">
+
+    </span><span class="com"># ??? 不懂</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> invchi2</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> chi</span><span class="pun">,</span><span class="pln"> df</span><span class="pun">):</span><span class="pln">
+        m </span><span class="pun">=</span><span class="pln"> chi </span><span class="pun">/</span><span class="pln"> </span><span class="lit">2.0</span><span class="pln">
+        sum1 </span><span class="pun">=</span><span class="pln"> math</span><span class="pun">.</span><span class="pln">exp</span><span class="pun">(-</span><span class="pln">m</span><span class="pun">)</span><span class="pln">
+        term </span><span class="pun">=</span><span class="pln"> sum1
+        </span><span class="kwd">for</span><span class="pln"> i </span><span class="kwd">in</span><span class="pln"> range</span><span class="pun">(</span><span class="lit">1</span><span class="pun">,</span><span class="pln"> df</span><span class="com">//2):</span><span class="pln">
+            term </span><span class="pun">*=</span><span class="pln"> m </span><span class="pun">/</span><span class="pln"> </span><span class="kwd">float</span><span class="pun">(</span><span class="pln">i</span><span class="pun">)</span><span class="pln">
+            sum1 </span><span class="pun">+=</span><span class="pln"> term
+        </span><span class="kwd">return</span><span class="pln"> min</span><span class="pun">(</span><span class="pln">sum1</span><span class="pun">,</span><span class="pln"> </span><span class="lit">1.0</span><span class="pun">)</span><span class="pln">
+
+    </span><span class="com"># 设定分类概率的下限，如将bad的分类下线设置为0.6，则只有当P(bad|item)&gt;0.6时才判定为bad</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> setminimum</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">,</span><span class="pln"> min</span><span class="pun">):</span><span class="pln">
+        </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">minimums</span><span class="pun">[</span><span class="pln">cat</span><span class="pun">]</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> min
+
+    </span><span class="kwd">def</span><span class="pln"> getminimum</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> cat</span><span class="pun">):</span><span class="pln">
+        </span><span class="kwd">if</span><span class="pln"> cat </span><span class="kwd">not</span><span class="pln"> </span><span class="kwd">in</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">minimums</span><span class="pun">:</span><span class="pln">
+            </span><span class="kwd">return</span><span class="pln"> </span><span class="lit">0</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">minimums</span><span class="pun">[</span><span class="pln">cat</span><span class="pun">]</span><span class="pln">
+
+    </span><span class="com"># 分类</span><span class="pln">
+    </span><span class="kwd">def</span><span class="pln"> classify</span><span class="pun">(</span><span class="kwd">self</span><span class="pun">,</span><span class="pln"> item</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">default</span><span class="pun">=</span><span class="kwd">None</span><span class="pun">):</span><span class="pln">
+        </span><span class="com"># 循环遍历寻找概率值最佳的结果</span><span class="pln">
+        best </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">default</span><span class="pln">
+        maxprob </span><span class="pun">=</span><span class="pln"> </span><span class="lit">0.0</span><span class="pln">
+        </span><span class="kwd">for</span><span class="pln"> c </span><span class="kwd">in</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">categories</span><span class="pun">():</span><span class="pln">
+            p </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">fisherprob</span><span class="pun">(</span><span class="pln">item</span><span class="pun">,</span><span class="pln"> c</span><span class="pun">)</span><span class="pln">
+            </span><span class="com"># 确保其超过下限</span><span class="pln">
+            </span><span class="kwd">if</span><span class="pln"> p </span><span class="pun">&gt;</span><span class="pln"> </span><span class="kwd">self</span><span class="pun">.</span><span class="pln">getminimum</span><span class="pun">(</span><span class="pln">c</span><span class="pun">)</span><span class="pln"> </span><span class="kwd">and</span><span class="pln"> p </span><span class="pun">&gt;</span><span class="pln"> maxprob</span><span class="pun">:</span><span class="pln">
+                best </span><span class="pun">=</span><span class="pln"> c
+                maxprob </span><span class="pun">=</span><span class="pln"> p
+            </span><span class="kwd">print</span><span class="pln"> </span><span class="str">'('</span><span class="pun">,</span><span class="pln"> c</span><span class="pun">,</span><span class="pln"> </span><span class="str">', '</span><span class="pun">,</span><span class="pln"> p</span><span class="pun">,</span><span class="pln"> </span><span class="str">')'</span><span class="pln">
+        </span><span class="kwd">return</span><span class="pln"> best
+
+
+
+
+</span><span class="kwd">if</span><span class="pln"> __name__ </span><span class="pun">==</span><span class="pln"> </span><span class="str">'__main__'</span><span class="pun">:</span><span class="pln">
+    </span><span class="com"># 测试 getwords 函数</span><span class="pln">
+    </span><span class="str">"""
+    doc = "</span><span class="pln">I am a teacher </span><span class="kwd">and</span><span class="pln"> he </span><span class="kwd">is</span><span class="pln"> a student</span><span class="str">"
+    doc_words = getwords(doc)
+    print doc_words.keys()
+    """</span><span class="pln">
+
+    </span><span class="com"># 测试训练函数train</span><span class="pln">
+    </span><span class="str">"""
+    cl = classifier(getwords)
+    cl.train('the quick brown fox jumps over the lazy dog', 'good')
+    cl.train('make quick money in the online casino', 'bad')
+    print cl.fcount('quick', 'good')
+    print cl.fcount('quick', 'bad')
+    """</span><span class="pln">
+
+    </span><span class="com"># 测试计算条件概率</span><span class="pln">
+    </span><span class="str">"""
+    cl = classifier(getwords)
+    sampletrain(cl)
+    #print cl.fprob('money', 'good')
+    print cl.weightedprob('money', 'good', cl.fprob)
+    sampletrain(cl)
+    print cl.weightedprob('money', 'good', cl.fprob)
+    """</span><span class="pln">
+
+    </span><span class="com"># 测试朴素贝叶斯计算文档概率</span><span class="pln">
+    </span><span class="str">"""
+    cl = naivebayes(getwords)
+    sampletrain(cl)
+    print cl.prob('quick rabbit', 'good')
+    print cl.prob('quick rabbit', 'bad')
+    """</span><span class="pln">
+
+    </span><span class="com"># 测试朴素贝叶斯分类器依照不同的阈值判断类别</span><span class="pln">
+    </span><span class="str">"""
+    cl = naivebayes(getwords)
+    sampletrain(cl)
+    print cl.classify('quick money')
+    # 设置P(bad|item) &gt; 3.0 * P(good|item)时才判定为bad
+    cl.setthresholds('bad', 3.0)
+    print cl.classify('quick money')
+
+    for i in range(10):
+        sampletrain(cl)
+    print cl.classify('quick money')
+    """</span><span class="pln">
+
+    </span><span class="com"># 测试基于fisher方法的分类器</span><span class="pln">
+    </span><span class="str">"""
+    cl = fisherclassifier(getwords)
+    sampletrain(cl)
+    #print cl.cprob('quick', 'good') + cl.cprob('quick', 'bad')
+    print cl.cprob('money', 'bad')
+
+    # 整片文档的概率
+    print cl.fisherprob('quick rabbit', 'good')
+    print cl.fisherprob('quick rabbit', 'bad')
+
+    # 整片文档的类别
+    cl.setminimum('bad', 0.8)
+    cl.setminimum('good', 0.4)
+    print cl.classify('quick money')
+    """</span><span class="pln">
+    </span><span class="com"># 测试改写后的操作sqlite数据库的函数是否正确</span><span class="pln">
+    cl </span><span class="pun">=</span><span class="pln"> fisherclassifier</span><span class="pun">(</span><span class="pln">getwords</span><span class="pun">)</span><span class="pln">
+    cl</span><span class="pun">.</span><span class="pln">setdb</span><span class="pun">(</span><span class="str">'test.db'</span><span class="pun">)</span><span class="pln">
+    </span><span class="com">#sampletrain(cl)</span><span class="pln">
+    res1 </span><span class="pun">=</span><span class="pln"> cl</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select * from fc'</span><span class="pun">).</span><span class="pln">fetchall</span><span class="pun">()</span><span class="pln">
+    res2 </span><span class="pun">=</span><span class="pln"> cl</span><span class="pun">.</span><span class="pln">con</span><span class="pun">.</span><span class="pln">execute</span><span class="pun">(</span><span class="str">'select * from cc'</span><span class="pun">).</span><span class="pln">fetchall</span><span class="pun">()</span><span class="pln">
+    res3 </span><span class="pun">=</span><span class="pln"> cl</span><span class="pun">.</span><span class="pln">catcount</span><span class="pun">(</span><span class="str">'good'</span><span class="pun">)</span><span class="pln">
+    </span><span class="com">#print res3</span><span class="pln">
+
+    </span><span class="com"># 构建朴素贝叶斯分类器，直接使用已经建立好的数据库</span><span class="pln">
+    cl2 </span><span class="pun">=</span><span class="pln"> naivebayes</span><span class="pun">(</span><span class="pln">getwords</span><span class="pun">)</span><span class="pln">
+    cl2</span><span class="pun">.</span><span class="pln">setdb</span><span class="pun">(</span><span class="str">'test.db'</span><span class="pun">)</span><span class="pln">
+    res4 </span><span class="pun">=</span><span class="pln"> cl2</span><span class="pun">.</span><span class="pln">classify</span><span class="pun">(</span><span class="str">'quick money'</span><span class="pun">)</span><span class="pln">
+    </span><span class="kwd">print</span><span class="pln"> res4</span></pre>
+		</article>
+								<div class="action-share bdsharebuttonbox bdshare-button-style0-24" data-bd-bind="1460540299242">
+			<span>分享到：</span><a class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a><a class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a class="bds_bdhome" data-cmd="bdhome" title="分享到百度新首页"></a><a class="bds_tqf" data-cmd="tqf" title="分享到腾讯朋友"></a><a class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a class="bds_diandian" data-cmd="diandian" title="分享到点点网"></a><a class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a><a class="bds_ty" data-cmd="ty" title="分享到天涯社区"></a><a class="bds_kaixin001" data-cmd="kaixin001" title="分享到开心网"></a><a class="bds_taobao" data-cmd="taobao"></a><a class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a><a class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a><a class="bds_twi" data-cmd="twi" title="分享到Twitter"></a><a class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a class="bds_copy" data-cmd="copy" title="分享到复制网址"></a><a class="bds_more" data-cmd="more">更多</a> <span>(</span><a class="bds_count" data-cmd="count" title="累计分享0次">0</a><span>)</span>		</div>
+		<div class="article-tags">标签：<a href="http://www.itdadao.com/tags/python/" rel="tag">Python</a><a href="http://www.itdadao.com/tags/%e5%9e%83%e5%9c%be%e9%82%ae%e4%bb%b6%e5%88%86%e7%b1%bb/" rel="tag">垃圾邮件分类</a><a href="http://www.itdadao.com/tags/%e6%95%b0%e6%8d%ae%e6%8c%96%e6%8e%98/" rel="tag">数据挖掘</a><a href="http://www.itdadao.com/tags/%e8%b4%9d%e5%8f%b6%e6%96%af%e5%88%86%e7%b1%bb%e5%99%a8/" rel="tag">贝叶斯分类器</a></div>
+		
+		
+				<div class="title" id="comments">
+	<h3>评论 <small>抢沙发</small></h3>
+</div>
+<div id="respond" class="no_webshot">
+		
+	<form action="http://www.itdadao.com/wp-comments-post.php" method="post" id="commentform">
+		<div class="comt">
+			<div class="comt-title">
+								<p><a id="cancel-comment-reply-link" href="javascript:;">取消</a></p>
+			</div>
+			<div class="comt-box">
+				<textarea placeholder="你的评论可以一针见血" class="input-block-level comt-area" name="comment" id="comment" cols="100%" rows="3" tabindex="1" onkeydown="if(event.ctrlKey&amp;&amp;event.keyCode==13){document.getElementById(&#39;submit&#39;).click();return false};"></textarea>
+				<div class="comt-ctrl">
+					<div class="comt-tips"><input type="hidden" name="comment_post_ID" value="583472" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+<label for="comment_mail_notify" class="checkbox inline hide" style="padding-top:0"><input type="checkbox" name="comment_mail_notify" id="comment_mail_notify" value="comment_mail_notify" checked="checked">有人回复时邮件通知我</label><div class="comt-tip comt-loading" style="display: none;">评论提交中...</div><div class="comt-tip comt-error" style="display: none;">#</div></div>
+					<button type="submit" name="submit" id="submit" tabindex="5">提交评论</button>
+					<!-- <span data-type="comment-insert-smilie" class="muted comt-smilie"><i class="icon-thumbs-up icon12"></i> 表情</span> -->
+				</div>
+			</div>
+
+												</div>
+
+	</form>
+	</div>
+	</div>
+	</div>
+	<aside class="sidebar">
+<div class="widget widget_ui_ads affix-top" style="top: 0px;"><div class="item"><script async="" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/adsbygoogle.js"></script>
+<!-- 300x600-文字 -->
+<ins class="adsbygoogle" style="display:inline-block;width:300px;height:600px" data-ad-client="ca-pub-8722128765990495" data-ad-slot="8162023426" data-adsbygoogle-status="done"><ins id="aswift_1_expand" style="display:inline-table;border:none;height:600px;margin:0;padding:0;position:relative;visibility:visible;width:300px;background-color:transparent"><ins id="aswift_1_anchor" style="display:block;border:none;height:600px;margin:0;padding:0;position:relative;visibility:visible;width:300px;background-color:transparent"><iframe width="300" height="600" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" onload="var i=this.id,s=window.google_iframe_oncopy,H=s&amp;&amp;s.handlers,h=H&amp;&amp;H[i],w=this.contentWindow,d;try{d=w.document}catch(e){}if(h&amp;&amp;d&amp;&amp;(!d.body||!d.body.firstChild)){if(h.call){setTimeout(h,0)}else if(h.match){try{h=s.upd(h,i)}catch(e){}w.location.replace(h)}}" id="aswift_1" name="aswift_1" style="left:0;position:absolute;top:0;"></iframe></ins></ins></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div></div></aside></section>
+
+
+<footer class="footer">
+	<div class="container">
+		<div class="fcode">
+					</div>
+		<p>© 2016 <a href="http://www.itdadao.com/">IT大道</a> &nbsp; <a href="http://www.itdadao.com/sitemap.xml">网站地图</a>
+</p>
+		<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?8d58faf4f8982d298e5fd0816387f197";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>	</div>
+</footer>
+
+<script>
+window.jsui={
+    www: 'http://www.itdadao.com',
+    uri: 'http://www.itdadao.com/wp-content/themes/dux',
+    ver: '1.4',
+	roll: ["1","2"],
+    ajaxpager: '0',
+    url_rp: 'http://www.itdadao.com/reset-password/'
+};
+</script>
+<script type="text/javascript" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/jquery.min.js"></script>
+<script type="text/javascript" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/bootstrap.min.js"></script>
+<script type="text/javascript" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/loader.js"></script>
+<script type="text/javascript" src="./集体智慧编程——垃圾邮件过滤器Python实现_files/wp-embed.min.js"></script>
+
+
+<!-- This is the static html file created at 2016-04-13 17:21:27 by super static cache -->    <div class="m-mask"></div>    <div class="rollbar" style="display: none;"><ul><li><a href="javascript:(scrollTo(&#39;#comments&#39;,-15));"><i class="fa fa-comments"></i></a><h6>去评论<i></i></h6></li><li><a href="javascript:(scrollTo());"><i class="fa fa-angle-up"></i></a><h6>去顶部<i></i></h6></li>    </ul></div><ul class="m-navbar">
+			<li id="menu-item-6" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-6"><a href="http://www.itdadao.com/design/">设计</a></li>
+<li id="menu-item-438954" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-438954"><a href="http://www.itdadao.com/tech-article/">技术</a></li>
+<li id="menu-item-454048" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-454048"><a href="http://www.itdadao.com/news-article/">资讯</a></li>
+<li id="menu-item-8" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-8"><a href="http://www.itdadao.com/market/">运营</a></li>
+<li id="menu-item-4" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-4"><a href="http://www.itdadao.com/enterprise/">创业</a></li>
+							<li class="navto-search"><a href="javascript:;" class="search-show active"><i class="fa fa-search"></i></a></li>
+					</ul>			<div class="sign">			    <div class="sign-mask"></div>			    <div class="container">			        <a href="javascript:;" class="close-link signclose-loader"><i class="fa fa-close"></i></a>			        <div class="sign-tips"></div>			        <form id="sign-in">  			            <h3><small class="signup-loader">切换注册</small>登录</h3>			            <h6>			                <label for="inputEmail">用户名或邮箱</label>			                <input type="text" name="username" class="form-control" id="inputEmail" placeholder="用户名或邮箱">			            </h6>			            <h6>			                <label for="inputPassword">密码</label>			                <input type="password" name="password" class="form-control" id="inputPassword" placeholder="登录密码">			            </h6>			            <div class="sign-submit">			                <input type="button" class="btn btn-primary signsubmit-loader" name="submit" value="登录">  			                <input type="hidden" name="action" value="signin">			                <label><input type="checkbox" checked="checked" name="remember" value="forever">记住我</label>			            </div><div class="sign-info"><a href="http://www.itdadao.com/reset-password/">找回密码？</a></div></form>			        <form id="sign-up"> 			            <h3><small class="signin-loader">切换登录</small>注册</h3>			            <h6>			                <label for="inputName">昵称</label>			                <input type="text" name="name" class="form-control" id="inputName" placeholder="设置昵称">			            </h6>			            <h6>			                <label for="inputEmail">邮箱</label>			                <input type="email" name="email" class="form-control" id="inputEmail" placeholder="邮箱">			            </h6>			            <div class="sign-submit">			                <input type="button" class="btn btn-primary btn-block signsubmit-loader" name="submit" value="快速注册">  			                <input type="hidden" name="action" value="signup">  			            </div>			        </form>			    </div>			</div>		</body></html>

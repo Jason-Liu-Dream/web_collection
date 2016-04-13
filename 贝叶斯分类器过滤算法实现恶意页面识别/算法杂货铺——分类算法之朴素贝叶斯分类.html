@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/dmpcm"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/ping.gif"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/pixel"><script src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/cm.js" charset="utf-8"></script><script src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/id.php" charset="utf-8"></script>
+
+<title>算法杂货铺——分类算法之朴素贝叶斯分类(Naive Bayesian classification) - T2噬菌体 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./算法杂货铺——分类算法之朴素贝叶斯分类_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./算法杂货铺——分类算法之朴素贝叶斯分类_files/bundle-Minyx2_Lite.css">
+<link type="text/css" rel="stylesheet" href="./算法杂货铺——分类算法之朴素贝叶斯分类_files/35418.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/leoo2sk/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/leoo2sk/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/leoo2sk/wlwmanifest.xml">
+<script type="text/javascript" async="" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/ga.js"></script><script src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'leoo2sk', cb_enable_mathjax=false;</script>
+<script src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/blog-common.js" type="text/javascript"></script>
+<script src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/bundle-Minyx2_Lite.js" language="javascript" type="text/javascript"></script>
+</head>
+<body><link href="./算法杂货铺——分类算法之朴素贝叶斯分类_files/jiathis_share.css" rel="stylesheet" type="text/css"><div class="jiathis_style" style="height: auto; position: fixed; z-index: 100000000; top: 150px; right: 0px; overflow: hidden; width: 26px;"><table cellpadding="0" cellspacing="0"><tbody style="background:transparent"><tr><td style="background:transparent"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/r1.gif" style="cursor:pointer;" onmouseover="$CKE.over()" onclick="$CKE.center(this)"></td><td><div><div class="jiadiv_01"><div style="width:100%;background:#F2F2F2;border-bottom:1px solid #E5E5E5;line-height:200%;padding-left:5px;font-size:12px"><table width="100%"><tbody><tr class="jt_sharetitle"><td align="left" style="text-align:left;line-height:25px;font-size:14px;font-weight:bold;color:#000000;">分享到...</td><td align="right" style="text-align:right;"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/img_exit.gif" border="0" style="opacity:0.5;filter:alpha(opacity=50);margin:0 10px;cursor:pointer;" onclick="$CKE.shareClose();"></td></tr></tbody></table></div><div class="jiadiv_02" style="width:100%;" id="jiathis_sers"><a href="javascript:;" onclick="jiathis_sendto(&#39;weixin&#39;);return false;" class="jiatitle"><span class="jtico jtico_weixin">微信</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tsina&#39;);return false;" class="jiatitle"><span class="jtico jtico_tsina">微博</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;copy&#39;);return false;" class="jiatitle"><span class="jtico jtico_copy">复制网址</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;email&#39;);return false;" class="jiatitle"><span class="jtico jtico_email">邮件</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;cqq&#39;);return false;" class="jiatitle"><span class="jtico jtico_cqq">QQ好友</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;qzone&#39;);return false;" class="jiatitle"><span class="jtico jtico_qzone">QQ空间</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;renren&#39;);return false;" class="jiatitle"><span class="jtico jtico_renren">人人网</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;kaixin001&#39;);return false;" class="jiatitle"><span class="jtico jtico_kaixin001">开心网</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;evernote&#39;);return false;" class="jiatitle"><span class="jtico jtico_evernote">印象笔记</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;linkedin&#39;);return false;" class="jiatitle"><span class="jtico jtico_linkedin">领英</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;feixin&#39;);return false;" class="jiatitle"><span class="jtico jtico_feixin">飞信</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;douban&#39;);return false;" class="jiatitle"><span class="jtico jtico_douban">豆瓣</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;twitter&#39;);return false;" class="jiatitle"><span class="jtico jtico_twitter">Twitter</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;fb&#39;);return false;" class="jiatitle"><span class="jtico jtico_fb">Facebook</span></a><a href="javascript:;" onclick="jiathis_sendto(&#39;ishare&#39;);return false;" class="jiatitle"><span class="jtico jtico_ishare">一键分享</span></a><a href="javascript:;" onclick="$CKE.center(this);return false;" class="jiatitle"><span class="jtico jtico_jiathis">查看更多(96)</span></a><div style="clear:both"></div></div><div class="ckepopBottom" style="width:100%;"><div style="float:left;font-size:10px"><a href="http://www.jiathis.com/help/html/what-is-jiathis" class="link_01" style="color:#333333;display:none;" target="_blank">这是什么工具?</a></div><div style="float:right;font-size:11px;margin:0 5px 0 0;"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/img_012.gif" align="absmiddle" border="0"><a href="http://www.jiathis.com/index2" style="color:#333333;padding:0 3px;" class="link_01" target="_blank">JiaThis</a></div><div style="clear:both"></div></div></div></div></td></tr></tbody></table></div><iframe frameborder="0" style="position: absolute; display: none;"></iframe><div class="jiathis_style" style="height: auto; position: absolute; z-index: 100000000; display: none; top: 50%; left: 50%; overflow: auto;"><div style="border:10px solid #7F7F7F; width:300px;"><div class="jiadiv_01" style="width:300px;"><div style="background:#F2F2F2;line-height:100%;height:30px;overflow:hidden;width:300px;"><table width="100%" style="margin:5px 0 0 0;"><tbody><tr class="jt_sharetitle" style="line-height:20px!important;"><td align="left" style="text-align:left;font-size:12px;">分享到各大网站</td><td align="right"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/img_exit.gif" border="0" style="margin:0 4px;cursor:pointer;" onclick="$CKE.centerClose();"></td></tr></tbody></table></div><div class="searchTxtCont"><div style="background:url(http://v2.jiathis.com/code/images/img_so.gif) no-repeat center;height:30px; width:281px"><form onsubmit="return false;"><input class="searchTxt" name="" type="text" onclick="this.value=&#39;&#39;;this.style.color=&#39;#000&#39;;" value="输入网站名或拼音缩写" onkeyup="$CKE.choose(this);"></form></div></div><div id="jiathis_sharelist" class="jiadiv_02" style="width:300px;height:300px;overflow-y:auto;"><a href="javascript:;" onclick="jiathis_sendto(&#39;weixin&#39;);return false;" class="jiatitle"><span class="jtico jtico_weixin">微信</span><input type="hidden" value="weixin,微信,wx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tsina&#39;);return false;" class="jiatitle"><span class="jtico jtico_tsina">微博</span><input type="hidden" value="tsina,微博,xlwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;cqq&#39;);return false;" class="jiatitle"><span class="jtico jtico_cqq">QQ好友</span><input type="hidden" value="cqq,QQ好友,cqq"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;qzone&#39;);return false;" class="jiatitle"><span class="jtico jtico_qzone">QQ空间</span><input type="hidden" value="qzone,QQ空间,qqkj"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;copy&#39;);return false;" class="jiatitle"><span class="jtico jtico_copy">复制网址</span><input type="hidden" value="copy,复制网址,fzwz"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;fav&#39;);return false;" class="jiatitle"><span class="jtico jtico_fav">收藏夹</span><input type="hidden" value="fav,收藏夹,scj"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;print&#39;);return false;" class="jiatitle"><span class="jtico jtico_print">打印</span><input type="hidden" value="print,打印,dy"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;email&#39;);return false;" class="jiatitle"><span class="jtico jtico_email">邮件</span><input type="hidden" value="email,邮件,yj"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;renren&#39;);return false;" class="jiatitle"><span class="jtico jtico_renren">人人网</span><input type="hidden" value="renren,人人网,rrw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;kaixin001&#39;);return false;" class="jiatitle"><span class="jtico jtico_kaixin001">开心网</span><input type="hidden" value="kaixin001,开心网,kxw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;evernote&#39;);return false;" class="jiatitle"><span class="jtico jtico_evernote">印象笔记</span><input type="hidden" value="evernote,印象笔记,evernote"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;linkedin&#39;);return false;" class="jiatitle"><span class="jtico jtico_linkedin">领英</span><input type="hidden" value="linkedin,领英,linkedin"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;feixin&#39;);return false;" class="jiatitle"><span class="jtico jtico_feixin">飞信</span><input type="hidden" value="feixin,飞信,fx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;douban&#39;);return false;" class="jiatitle"><span class="jtico jtico_douban">豆瓣</span><input type="hidden" value="douban,豆瓣,db"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;twitter&#39;);return false;" class="jiatitle"><span class="jtico jtico_twitter">Twitter</span><input type="hidden" value="twitter,Twitter,twitter"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;fb&#39;);return false;" class="jiatitle"><span class="jtico jtico_fb">Facebook</span><input type="hidden" value="fb,Facebook,facebook"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;ishare&#39;);return false;" class="jiatitle"><span class="jtico jtico_ishare">一键分享</span><input type="hidden" value="ishare,一键分享,yjfx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;ujian&#39;);return false;" class="jiatitle"><span class="jtico jtico_ujian">猜你喜欢</span><input type="hidden" value="ujian,猜你喜欢,cnxh"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;yixin&#39;);return false;" class="jiatitle"><span class="jtico jtico_yixin">易信</span><input type="hidden" value="yixin,易信,yx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;huaban&#39;);return false;" class="jiatitle"><span class="jtico jtico_huaban">花瓣网</span><input type="hidden" value="huaban,花瓣网,hbw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tqq&#39;);return false;" class="jiatitle"><span class="jtico jtico_tqq">腾讯微博</span><input type="hidden" value="tqq,腾讯微博,txwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;googleplus&#39;);return false;" class="jiatitle"><span class="jtico jtico_googleplus">Google+</span><input type="hidden" value="googleplus,Google+,googlej"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;alibaba&#39;);return false;" class="jiatitle"><span class="jtico jtico_alibaba">阿里巴巴</span><input type="hidden" value="alibaba,阿里巴巴,albb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;xiaoyou&#39;);return false;" class="jiatitle"><span class="jtico jtico_xiaoyou">朋友网</span><input type="hidden" value="xiaoyou,朋友网,pyw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;sdonote&#39;);return false;" class="jiatitle"><span class="jtico jtico_sdonote">麦库记事</span><input type="hidden" value="sdonote,麦库记事,mkjs"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;baidu&#39;);return false;" class="jiatitle"><span class="jtico jtico_baidu">百度搜藏</span><input type="hidden" value="baidu,百度搜藏,bdsc"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;gmail&#39;);return false;" class="jiatitle"><span class="jtico jtico_gmail">Gmail邮箱</span><input type="hidden" value="gmail,Gmail邮箱,gmailyx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;ydnote&#39;);return false;" class="jiatitle"><span class="jtico jtico_ydnote">有道云笔记</span><input type="hidden" value="ydnote,有道云笔记,ydybj"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tianya&#39;);return false;" class="jiatitle"><span class="jtico jtico_tianya">天涯社区</span><input type="hidden" value="tianya,天涯社区,tysq"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tieba&#39;);return false;" class="jiatitle"><span class="jtico jtico_tieba">百度贴吧</span><input type="hidden" value="tieba,百度贴吧,bdtb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;qingbiji&#39;);return false;" class="jiatitle"><span class="jtico jtico_qingbiji">轻笔记</span><input type="hidden" value="qingbiji,轻笔记,qbj"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tifeng&#39;);return false;" class="jiatitle"><span class="jtico jtico_tifeng">凤凰微博</span><input type="hidden" value="tifeng,凤凰微博,fhwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;fanfou&#39;);return false;" class="jiatitle"><span class="jtico jtico_fanfou">饭否</span><input type="hidden" value="fanfou,饭否,ff"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;mingdao&#39;);return false;" class="jiatitle"><span class="jtico jtico_mingdao">明道</span><input type="hidden" value="mingdao,明道,md"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;douban9dian&#39;);return false;" class="jiatitle"><span class="jtico jtico_douban9dian">豆瓣9点</span><input type="hidden" value="douban9dian,豆瓣9点,db9d"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;google&#39;);return false;" class="jiatitle"><span class="jtico jtico_google">谷歌</span><input type="hidden" value="google,谷歌,gg"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;buzz&#39;);return false;" class="jiatitle"><span class="jtico jtico_buzz">谷歌Buzz</span><input type="hidden" value="buzz,谷歌Buzz,ggbuzz"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;youdao&#39;);return false;" class="jiatitle"><span class="jtico jtico_youdao">有道书签</span><input type="hidden" value="youdao,有道书签,ydsq"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;qq&#39;);return false;" class="jiatitle"><span class="jtico jtico_qq">QQ书签</span><input type="hidden" value="qq,QQ书签,qqsq"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;msn&#39;);return false;" class="jiatitle"><span class="jtico jtico_msn">MSN</span><input type="hidden" value="msn,MSN,msn"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;pinterest&#39;);return false;" class="jiatitle"><span class="jtico jtico_pinterest">Pinterest</span><input type="hidden" value="pinterest,Pinterest,pinterest"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;duitang&#39;);return false;" class="jiatitle"><span class="jtico jtico_duitang">堆糖</span><input type="hidden" value="duitang,堆糖,dt"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tyaolan&#39;);return false;" class="jiatitle"><span class="jtico jtico_tyaolan">摇篮微博</span><input type="hidden" value="tyaolan,摇篮微博,ylwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;hi&#39;);return false;" class="jiatitle"><span class="jtico jtico_hi">百度空间</span><input type="hidden" value="hi,百度空间,bdkj"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;hotmail&#39;);return false;" class="jiatitle"><span class="jtico jtico_hotmail">Hotmail邮箱</span><input type="hidden" value="hotmail,Hotmail邮箱,hotmailyx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;xqw&#39;);return false;" class="jiatitle"><span class="jtico jtico_xqw">雪球</span><input type="hidden" value="xqw,雪球,xqw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;hexun&#39;);return false;" class="jiatitle"><span class="jtico jtico_hexun">和讯</span><input type="hidden" value="hexun,和讯,hx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;139mail&#39;);return false;" class="jiatitle"><span class="jtico jtico_139mail">139邮箱</span><input type="hidden" value="139mail,139邮箱,139yx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;189mail&#39;);return false;" class="jiatitle"><span class="jtico jtico_189mail">189邮箱</span><input type="hidden" value="189mail,189邮箱,189yx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;189cn&#39;);return false;" class="jiatitle"><span class="jtico jtico_189cn">翼友圈</span><input type="hidden" value="189cn,翼友圈,yyq"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tpeople&#39;);return false;" class="jiatitle"><span class="jtico jtico_tpeople">人民微博</span><input type="hidden" value="tpeople,人民微博,rmwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;txinhua&#39;);return false;" class="jiatitle"><span class="jtico jtico_txinhua">新华微博</span><input type="hidden" value="txinhua,新华微博,xhwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;translate&#39;);return false;" class="jiatitle"><span class="jtico jtico_translate">谷歌翻译</span><input type="hidden" value="translate,谷歌翻译,ggfy"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tuita&#39;);return false;" class="jiatitle"><span class="jtico jtico_tuita">推他</span><input type="hidden" value="tuita,推他,tt"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;mop&#39;);return false;" class="jiatitle"><span class="jtico jtico_mop">猫扑推客</span><input type="hidden" value="mop,猫扑推客,mptk"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;meilishuo&#39;);return false;" class="jiatitle"><span class="jtico jtico_meilishuo">美丽说</span><input type="hidden" value="meilishuo,美丽说,mls"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;mogujie&#39;);return false;" class="jiatitle"><span class="jtico jtico_mogujie">蘑菇街</span><input type="hidden" value="mogujie,蘑菇街,mgj"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;ganniu&#39;);return false;" class="jiatitle"><span class="jtico jtico_ganniu">赶牛网</span><input type="hidden" value="ganniu,赶牛网,gnw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;poco&#39;);return false;" class="jiatitle"><span class="jtico jtico_poco">Poco网</span><input type="hidden" value="poco,Poco网,pocow"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;leihou&#39;);return false;" class="jiatitle"><span class="jtico jtico_leihou">雷猴网</span><input type="hidden" value="leihou,雷猴网,lhw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;thexun&#39;);return false;" class="jiatitle"><span class="jtico jtico_thexun">和讯微博</span><input type="hidden" value="thexun,和讯微博,hxwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;dream163&#39;);return false;" class="jiatitle"><span class="jtico jtico_dream163">游戏江湖</span><input type="hidden" value="dream163,游戏江湖,yxjh"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;jcrb&#39;);return false;" class="jiatitle"><span class="jtico jtico_jcrb">法律微博</span><input type="hidden" value="jcrb,法律微博,flwb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;tumblr&#39;);return false;" class="jiatitle"><span class="jtico jtico_tumblr">Tumblr</span><input type="hidden" value="tumblr,Tumblr,tumblr"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;reddit&#39;);return false;" class="jiatitle"><span class="jtico jtico_reddit">Reddit</span><input type="hidden" value="reddit,Reddit,reddit"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;instapaper&#39;);return false;" class="jiatitle"><span class="jtico jtico_instapaper">Instapaper</span><input type="hidden" value="instapaper,Instapaper,instapaper"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;pocket&#39;);return false;" class="jiatitle"><span class="jtico jtico_pocket">Pocket</span><input type="hidden" value="pocket,Pocket,pocket"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;caimi&#39;);return false;" class="jiatitle"><span class="jtico jtico_caimi">财迷</span><input type="hidden" value="caimi,财迷,cm"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;iwo&#39;);return false;" class="jiatitle"><span class="jtico jtico_iwo">WO+分享</span><input type="hidden" value="iwo,WO+分享,iwo"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;waakee&#39;);return false;" class="jiatitle"><span class="jtico jtico_waakee">挖客网</span><input type="hidden" value="waakee,挖客网,wkw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;cyzone&#39;);return false;" class="jiatitle"><span class="jtico jtico_cyzone">创业邦</span><input type="hidden" value="cyzone,创业邦,cyb"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;99earth&#39;);return false;" class="jiatitle"><span class="jtico jtico_99earth">救救地球</span><input type="hidden" value="99earth,救救地球,jjdq"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;chouti&#39;);return false;" class="jiatitle"><span class="jtico jtico_chouti">抽屉网</span><input type="hidden" value="chouti,抽屉网,ctw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;dig24&#39;);return false;" class="jiatitle"><span class="jtico jtico_dig24">递客网</span><input type="hidden" value="dig24,递客网,dkw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;yijee&#39;);return false;" class="jiatitle"><span class="jtico jtico_yijee">易集网</span><input type="hidden" value="yijee,易集网,yjw"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;pdfonline&#39;);return false;" class="jiatitle"><span class="jtico jtico_pdfonline">Pdf在线转换</span><input type="hidden" value="pdfonline,Pdf在线转换,pdfzxzh"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;printfriendly&#39;);return false;" class="jiatitle"><span class="jtico jtico_printfriendly">友好打印</span><input type="hidden" value="printfriendly,友好打印,yhdy"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;w3c&#39;);return false;" class="jiatitle"><span class="jtico jtico_w3c">W3c验证</span><input type="hidden" value="w3c,W3c验证,w3cyz"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;bitly&#39;);return false;" class="jiatitle"><span class="jtico jtico_bitly">Bit.ly</span><input type="hidden" value="bitly,Bit.ly,bitly"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;digg&#39;);return false;" class="jiatitle"><span class="jtico jtico_digg">Digg</span><input type="hidden" value="digg,Digg,digg"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;mailru&#39;);return false;" class="jiatitle"><span class="jtico jtico_mailru">Mail.ru</span><input type="hidden" value="mailru,Mail.ru,mail.ru"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;diigo&#39;);return false;" class="jiatitle"><span class="jtico jtico_diigo">Diigo</span><input type="hidden" value="diigo,Diigo,diigo"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;friendfeed&#39;);return false;" class="jiatitle"><span class="jtico jtico_friendfeed">FriendFeed</span><input type="hidden" value="friendfeed,FriendFeed,friendfeed"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;myspace&#39;);return false;" class="jiatitle"><span class="jtico jtico_myspace">Myspace</span><input type="hidden" value="myspace,Myspace,myspace"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;mixx&#39;);return false;" class="jiatitle"><span class="jtico jtico_mixx">Mixx</span><input type="hidden" value="mixx,Mixx,mixx"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;netlog&#39;);return false;" class="jiatitle"><span class="jtico jtico_netlog">NetLog</span><input type="hidden" value="netlog,NetLog,netlog"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;netvibes&#39;);return false;" class="jiatitle"><span class="jtico jtico_netvibes">Netvibes</span><input type="hidden" value="netvibes,Netvibes,netvibes"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;phonefavs&#39;);return false;" class="jiatitle"><span class="jtico jtico_phonefavs">Phonefavs</span><input type="hidden" value="phonefavs,Phonefavs,phonefavs"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;pingfm&#39;);return false;" class="jiatitle"><span class="jtico jtico_pingfm">Ping.fm</span><input type="hidden" value="pingfm,Ping.fm,ping.fm"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;plaxo&#39;);return false;" class="jiatitle"><span class="jtico jtico_plaxo">Plaxo</span><input type="hidden" value="plaxo,Plaxo,plaxo"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;delicious&#39;);return false;" class="jiatitle"><span class="jtico jtico_delicious">Delicious</span><input type="hidden" value="delicious,Delicious,delicious"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;wong&#39;);return false;" class="jiatitle"><span class="jtico jtico_wong">Mister Wong</span><input type="hidden" value="wong,Mister Wong,misterwong"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;stumbleupon&#39;);return false;" class="jiatitle"><span class="jtico jtico_stumbleupon">Stumbleupon</span><input type="hidden" value="stumbleupon,Stumbleupon,stumbleupon"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;plurk&#39;);return false;" class="jiatitle"><span class="jtico jtico_plurk">Plurk</span><input type="hidden" value="plurk,Plurk,plurk"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;funp&#39;);return false;" class="jiatitle"><span class="jtico jtico_funp">Funp</span><input type="hidden" value="funp,Funp,funp"></a><a href="javascript:;" onclick="jiathis_sendto(&#39;myshare&#39;);return false;" class="jiatitle"><span class="jtico jtico_myshare">Myshare</span><input type="hidden" value="myshare,Myshare,myshare"></a><div style="clear:both"></div></div><div class="centerBottom"><div style="float:left;font-size:10px;"><a href="http://www.jiathis.com/help/html/what-is-jiathis" class="link_01" style="color:#333333;display:none;" target="_blank">这是什么工具?</a></div><div style="float:right;font-size:11px;margin:0 10px 0 0;"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/img_012.gif" align="absmiddle" border="none">&nbsp;<a href="http://www.jiathis.com/index2" style="color:#333333;" class="link_01" target="_blank">JiaThis</a></div><div style="clear:both"></div></div></div></div></div><iframe frameborder="0" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/jiathis_utility.html" style="display: none;"></iframe>
+<a name="top"></a>
+
+
+<div id="container">
+    <a class="minyx" href="http://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            
+                
+Posts - 79, 
+Articles - 0, 
+Comments - 3887
+<!---->
+            
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="http://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="http://www.cnblogs.com/leoo2sk/admin/EditPosts.aspx">Dashboard</a></li>
+        <li>
+            <a id="lnkLogin" href="http://passport.cnblogs.com/login.aspx?ReturnUrl=http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html">Login</a></li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="http://www.cnblogs.com/leoo2sk/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="http://space.cnblogs.com/msg/send/T2%e5%99%ac%e8%8f%8c%e4%bd%93">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="http://www.cnblogs.com/leoo2sk/gallery.html">Gallery</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="http://www.cnblogs.com/leoo2sk/rss">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="http://www.cnblogs.com/leoo2sk/">CodingLabs</a>
+            <!-- 子标题 -->
+            <small>
+                个人博客已迁移至codinglabs.org，欢迎访问</small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            
+<div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2><a id="cb_post_title_url" href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/naive-bayesian-classifier.html">算法杂货铺——分类算法之朴素贝叶斯分类(Naive Bayesian classification)</a></h2>
+    <small>2010-09-17 13:09 by T2噬菌体, <span id="post_view_count">126073</span> 阅读, <span id="post_comment_count">47</span> 评论, <a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#" onclick="AddToWz(1829190);return false;">收藏</a>,  <a href="http://i.cnblogs.com/EditPosts.aspx?postid=1829190" rel="nofollow">编辑</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body"><h1>0、写在前面的话</h1>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 我个人一直很喜欢算法一类的东西，在我看来算法是人类智慧的精华，其中蕴含着无与伦比的美感。而每次将学过的算法应用到实际中，并解决了实际问题后，那种快感更是我在其它地方体会不到的。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 一直想写关于算法的博文，也曾写过零散的两篇，但也许是相比于工程性文章来说太小众，并没有引起大家的兴趣。最近面临毕业找工作，为了能给自己增加筹码，决定再次复习算法方面的知识，我决定趁这个机会，写一系列关于算法的文章。这样做，主要是为了加强自己复习的效果，我想，如果能将复习的东西用自己的理解写成文章，势必比单纯的读书做题掌握的更牢固，也更能触发自己的思考。如果能有感兴趣的朋友从中有所收获，那自然更好。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 这个系列我将其命名为“算法杂货铺”，其原因就是这些文章一大特征就是“杂”，我不会专门讨论堆栈、链表、二叉树、查找、排序等任何一本数据结构教科书都会讲的基础内容，我会从一个“专题”出发，如概率算法、分类算法、NP问题、遗传算法等，然后做一个引申，可能会涉及到算法与数据结构、离散数学、概率论、统计学、运筹学、数据挖掘、形式语言与自动机等诸多方面，因此其内容结构就像一个杂货铺。当然，我会竭尽所能，尽量使内容“杂而不乱”。</p>
+<h1>1.1、摘要</h1>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 贝叶斯分类是一类分类算法的总称，这类算法均以贝叶斯定理为基础，故统称为贝叶斯分类。本文作为分类算法的第一篇，将首先介绍分类问题，对分类问题进行一个正式的定义。然后，介绍贝叶斯分类算法的基础——贝叶斯定理。最后，通过实例讨论贝叶斯分类中最简单的一种：朴素贝叶斯分类。</p>
+<h1>1.2、分类问题综述</h1>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 对于分类问题，其实谁都不会陌生，说我们每个人每天都在执行分类操作一点都不夸张，只是我们没有意识到罢了。例如，当你看到一个陌生人，你的脑子下意识判断TA是男是女；你可能经常会走在路上对身旁的朋友说“这个人一看就很有钱、那边有个非主流”之类的话，其实这就是一种分类操作。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 从数学角度来说，分类问题可做如下定义：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 已知集合：<img title="C=\{y_1,y_2,...,y_n\}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif.latex" alt="">和<img title="I=\{x_1,x_2,...,x_m,...\}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(1).latex" alt="">，确定映射规则<img title="y=f(x)" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(2).latex" alt="">，使得任意<img title="x_i \in I" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(3).latex" alt="">有且仅有一个<img title="y_j \in C" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(4).latex" alt="">使得<img title="y_j=f(x_i)" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(5).latex" alt="">成立。（不考虑模糊数学里的模糊集情况）</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 其中C叫做类别集合，其中每一个元素是一个类别，而I叫做项集合，其中每一个元素是一个待分类项，f叫做分类器。分类算法的任务就是构造分类器f。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 这里要着重强调，分类问题往往采用经验性方法构造映射规则，即一般情况下的分类问题缺少足够的信息来构造100%正确的映射规则，而是通过对经验数据的学习从而实现一定概率意义上正确的分类，因此所训练出的分类器并不是一定能将每个待分类项准确映射到其分类，分类器的质量与分类器构造方法、待分类数据的特性以及训练样本数量等诸多因素有关。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 例如，医生对病人进行诊断就是一个典型的分类过程，任何一个医生都无法直接看到病人的病情，只能观察病人表现出的症状和各种化验检测数据来推断病情，这时医生就好比一个分类器，而这个医生诊断的准确率，与他当初受到的教育方式（构造方法）、病人的症状是否突出（待分类数据的特性）以及医生的经验多少（训练样本数量）都有密切关系。</p>
+<h1>1.3、贝叶斯分类的基础——贝叶斯定理</h1>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 每次提到贝叶斯定理，我心中的崇敬之情都油然而生，倒不是因为这个定理多高深，而是因为它特别有用。这个定理解决了现实生活里经常遇到的问题：已知某条件概率，如何得到两个事件交换后的概率，也就是在已知P(A|B)的情况下如何求得P(B|A)。这里先解释什么是条件概率：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(A|B)" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(6).latex" alt="">表示事件B已经发生的前提下，事件A发生的概率，叫做事件B发生下事件A的条件概率。其基本求解公式为：<img title="P(A|B)=\frac{P(AB)}{P(B)}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(7).latex" alt="">。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 贝叶斯定理之所以有用，是因为我们在生活中经常遇到这种情况：我们可以很容易直接得出P(A|B)，P(B|A)则很难直接得出，但我们更关心P(B|A)，贝叶斯定理就为我们打通从P(A|B)获得P(B|A)的道路。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 下面不加证明地直接给出贝叶斯定理：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(B|A)=\frac{P(A|B)P(B)}{P(A)}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(8).latex" alt=""></p>
+<h1>1.4、朴素贝叶斯分类</h1>
+<h2>1.4.1、朴素贝叶斯分类的原理与流程</h2>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 朴素贝叶斯分类是一种十分简单的分类算法，叫它朴素贝叶斯分类是因为这种方法的思想<span>真</span>的很朴素，朴素贝叶斯的思想基础是这样的：对于给出的待分类项，求解在此项出现的条件下各个类别出现的概率，哪个最大，就认为此待分类项属于哪个类别。通俗来说，就好比这么个道理，你在街上看到一个黑人，我问你你猜这哥们哪里来的，你十有八九猜非洲。为什么呢？因为黑人中非洲人的比率最高，当然人家也可能是美洲人或亚洲人，但在没有其它可用信息下，我们会选择条件概率最大的类别，这就是朴素贝叶斯的思想基础。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 朴素贝叶斯分类的正式定义如下：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1、设<img title="x=\{a_1,a_2,...,a_m\}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(9).latex" alt="">为一个待分类项，而每个a为x的一个特征属性。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2、有类别集合<img title="C=\{y_1,y_2,...,y_n\}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif.latex" alt="">。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3、计算<img title="P(y_1|x),P(y_2|x),...,P(y_n|x)" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(10).latex" alt="">。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4、如果<img title="P(y_k|x)=max\{P(y_1|x),P(y_2|x),...,P(y_n|x)\}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(11).latex" alt="">，则<img title="x \in y_k" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(12).latex" alt="">。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 那么现在的关键就是如何计算第3步中的各个条件概率。我们可以这么做：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1、找到一个已知分类的待分类项集合，这个集合叫做训练样本集。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2、统计得到在各类别下各个特征属性的条件概率估计。即<img title="P(a_1|y_1),P(a_2|y_1),...,P(a_m|y_1);P(a_1|y_2),P(a_2|y_2),...,P(a_m|y_2);...;P(a_1|y_n),P(a_2|y_n),...,P(a_m|y_n)" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(13).latex" alt="">。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3、如果各个特征属性是条件独立的，则根据贝叶斯定理有如下推导：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(y_i|x)=\frac{P(x|y_i)P(y_i)}{P(x)}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(14).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 因为分母对于所有类别为常数，因为我们只要将分子最大化皆可。又因为各特征属性是条件独立的，所以有：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(x|y_i)P(y_i)=P(a_1|y_i)P(a_2|y_i)...P(a_m|y_i)P(y_i)=P(y_i)\prod^m_{j=1}P(a_j|y_i)" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(15).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 根据上述分析，朴素贝叶斯分类的流程可以由下图表示（暂时不考虑验证）：</p>
+<p><a href="http://images.cnblogs.com/cnblogs_com/leoo2sk/WindowsLiveWriter/4f6168bb064a_9C14/1_2.png"><img style="display: block; float: none; margin-left: auto; margin-right: auto; border-width: 0px;" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/1_thumb.png" border="0" alt="" width="770" height="598"></a></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 可以看到，整个朴素贝叶斯分类分为三个阶段：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 第一阶段——准备工作阶段，这个阶段的任务是为朴素贝叶斯分类做必要的准备，主要工作是根据具体情况确定特征属性，并对每个特征属性进行适当划分，然后由人工对一部分待分类项进行分类，形成训练样本集合。这一阶段的输入是所有待分类数据，输出是特征属性和训练样本。这一阶段是整个朴素贝叶斯分类中唯一需要人工完成的阶段，其质量对整个过程将有重要影响，分类器的质量很大程度上由特征属性、特征属性划分及训练样本质量决定。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 第二阶段——分类器训练阶段，这个阶段的任务就是生成分类器，主要工作是计算每个类别在训练样本中的出现频率及每个特征属性划分对每个类别的条件概率估计，并将结果记录。其输入是特征属性和训练样本，输出是分类器。这一阶段是机械性阶段，根据前面讨论的公式可以由程序自动计算完成。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 第三阶段——应用阶段。这个阶段的任务是使用分类器对待分类项进行分类，其输入是分类器和待分类项，输出是待分类项与类别的映射关系。这一阶段也是机械性阶段，由程序完成。</p>
+<h2>1.4.2、估计类别下特征属性划分的条件概率及Laplace校准</h2>
+<p><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </strong>这一节讨论P(a|y)的估计。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 由上文看出，计算各个划分的条件概率P(a|y)是朴素贝叶斯分类的关键性步骤，当特征属性为离散值时，只要很方便的统计训练样本中各个划分在每个类别中出现的频率即可用来估计P(a|y)，下面重点讨论特征属性是连续值的情况。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 当特征属性为连续值时，通常假定其值服从高斯分布（也称正态分布）。即：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="g(x,\eta ,\sigma )=\frac{1}{\sqrt{2\pi }\sigma }e^-\frac{(x-\eta)^2}{2\sigma^2}" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(16).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 而<img title="P(a_k|y_i)=g(a_k,\eta_{y_i},\sigma_{y_i})" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(17).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 因此只要计算出训练样本中各个类别中此特征项划分的各均值和标准差，代入上述公式即可得到需要的估计值。均值与标准差的计算在此不再赘述。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 另一个需要讨论的问题就是当P(a|y)=0怎么办，当某个类别下某个特征项划分没有出现时，就是产生这种现象，这会令分类器质量大大降低。为了解决这个问题，我们引入Laplace校准，它的思想非常简单，就是对没类别下所有划分的计数加1，这样如果训练样本集数量充分大时，并不会对结果产生影响，并且解决了上述频率为0的尴尬局面。</p>
+<h2>1.4.3、朴素贝叶斯分类实例：检测SNS社区中不真实账号</h2>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 下面讨论一个使用朴素贝叶斯分类解决实际问题的例子，为了简单起见，对例子中的数据做了适当的简化。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 这个问题是这样的，对于SNS社区来说，不<span>真实</span>账号（使用虚假身份或用户的小号）是一个普遍存在的问题，作为SNS社区的运营商，希望可以检测出这些不<span>真实</span>账号，从而在一些运营分析报告中避免这些账号的干扰，亦可以加强对SNS社区的了解与监管。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 如果通过纯人工检测，需要耗费大量的人力，效率也十分低下，如能引入自动检测机制，必将大大提升工作效率。这个问题说白了，就是要将社区中所有账号在<span>真实</span>账号和不<span>真实</span>账号两个类别上进行分类，下面我们一步一步实现这个过程。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 首先设C=0表示<span>真实</span>账号，C=1表示不<span>真实</span>账号。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em>1、确定特征属性及划分</em></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 这一步要找出可以帮助我们区分<span>真实</span>账号与不<span>真实</span>账号的特征属性，在实际应用中，特征属性的数量是很多的，划分也会比较细致，但这里为了简单起见，我们用少量的特征属性以及较粗的划分，并对数据做了修改。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 我们选择三个特征属性：a1：日志数量/注册天数，a2：好友数量/注册天数，a3：是否使用<span>真实</span>头像。在SNS社区中这三项都是可以直接从数据库里得到或计算出来的。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 下面给出划分：a1：{a&lt;=0.05, 0.05&lt;a&lt;0.2, a&gt;=0.2}，a1：{a&lt;=0.1, 0.1&lt;a&lt;0.8, a&gt;=0.8}，a3：{a=0（不是）,a=1（是）}。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em>2、获取训练样本</em></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 这里使用运维人员曾经人工检测过的1万个账号作为训练样本。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em>3、计算训练样本中每个类别的频率</em></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 用训练样本中<span>真实</span>账号和不<span>真实</span>账号数量分别除以一万，得到：</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(C=0)=8900/100000=0.89" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(18).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(C=1)=110/100000=0.11" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(19).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em>4、计算每个类别条件下各个特征属性划分的频率</em></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_1&lt;=0.05|C=0)=0.3" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(20).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(0.05&lt;a_1&lt;0.2|C=0)=0.5" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(21).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_1&gt;0.2|C=0)=0.2" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(22).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_1&lt;=0.05|C=1)=0.8" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(23).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(0.05&lt;a_1&lt;0.2|C=1)=0.1" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(24).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_1&gt;0.2|C=1)=0.1" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(25).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_2&lt;=0.1|C=0)=0.1" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(26).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(0.1&lt;a_2&lt;0.8|C=0)=0.7" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(27).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_2&gt;0.8|C=0)=0.2" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(28).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_2&lt;=0.1|C=1)=0.7" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(29).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(0.1&lt;a_2&lt;0.8|C=1)=0.2" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(30).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_2&gt;0.8|C=1)=0.1" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(31).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_3=0|C=0)=0.2" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(32).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_3=1|C=0)=0.8" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(33).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_3=0|C=1)=0.9" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(34).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(a_3=1|C=1)=0.1" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(35).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em>5、使用分类器进行鉴别</em></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 下面我们使用上面训练得到的分类器鉴别一个账号，这个账号使用非<span>真实</span>头像，日志数量与注册天数的比率为0.1，好友数与注册天数的比率为0.2。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(C=0)P(x|C=0)=P(C=0)P(0.05&lt;a_1&lt;0.2|C=0)P(0.1&lt;a_2&lt;0.8|C=0)P(a_3=0|C=0)=0.89*0.5*0.7*0.2=0.0623" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(36).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img title="P(C=1)P(x|C=1)=P(C=1)P(0.05&lt;a_1&lt;0.2|C=1)P(0.1&lt;a_2&lt;0.8|C=1)P(a_3=0|C=1)=0.11*0.1*0.2*0.9=0.00198" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/gif(37).latex" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 可以看到，虽然这个用户没有使用<span>真实</span>头像，但是通过分类器的鉴别，更倾向于将此账号归入<span>真实</span>账号类别。这个例子也展示了当特征属性充分多时，朴素贝叶斯分类对个别属性的抗干扰性。</p>
+<h1>1.5、分类器的评价</h1>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 虽然后续还会提到其它分类算法，不过这里我想先提一下如何评价分类器的质量。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 首先要定义，分类器的正确率指分类器正确分类的项目占所有被分类项目的比率。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 通常使用回归测试来评估分类器的准确率，最简单的方法是用构造完成的分类器对训练数据进行分类，然后根据结果给出正确率评估。但这不是一个好方法，因为使用训练数据作为检测数据有可能因为过分拟合而导致结果过于乐观，所以一种更好的方法是在构造初期将训练数据一分为二，用一部分构造分类器，然后用另一部分检测分类器的准确率。</p></div><div id="MySignature" style="display: block;"><a target="_blank" href="http://creativecommons.org/licenses/by-nc/3.0/deed.zh" rel="license"><img align="left" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/88x31.png" style="border-width: 0pt;" alt="Creative Commons License"></a><p>本文基于<a target="_blank" title="Attribution-NonCommercial 3.0 Unported" href="http://creativecommons.org/licenses/by-nc/3.0/deed.zh">署名-非商业性使用 3.0</a>许可协议发布，欢迎转载，演绎，但是必须保留本文的署名<a href="http://leoo2sk.cnblogs.com/" target="_blank">张洋</a>（包含链接），且不得用于商业目的。如您有任何疑问或者授权方面的协商，请<a href="mailto:ericzhang.buaa@gmail.com" target="_blank">与我联系</a>。</p></div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info"><div id="green_channel">
+<a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(1829190,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+<a id="green_channel_follow" onclick="c_follow();" href="javascript:void(0);">关注我</a>
+<a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a><a id="green_channel_contact" href="http://msg.cnblogs.com/send/T2%E5%99%AC%E8%8F%8C%E4%BD%93" target="_blank">联系我</a>
+<a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/icon_weibo_24.png" alt=""></a>
+<a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+<div id="author_profile_info" class="author_profile_info">
+<a href="http://home.cnblogs.com/u/leoo2sk/" target="_blank"><img src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/u31860.jpg" class="author_avatar" alt=""></a>
+<div id="author_profile_detail" class="author_profile_info">
+<a href="http://home.cnblogs.com/u/leoo2sk/">T2噬菌体</a><br>
+<a href="http://home.cnblogs.com/u/leoo2sk/followees">关注 - 14</a><br>
+<a href="http://home.cnblogs.com/u/leoo2sk/followers">粉丝 - 2232</a>
+</div>
+</div>
+<div class="clear"></div>
+<div id="author_profile_honor">荣誉：<a href="http://www.cnblogs.com/expert/" target="_blank">推荐博客</a></div>
+<div id="author_profile_follow">
+    <a href="javascript:void(0);" onclick="c_follow();return false;">+加关注</a>
+</div>
+</div>
+<div id="div_digg">										
+    <div class="diggit" onclick="votePost(1829190,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">32</span>
+    </div>
+	<div class="buryit" onclick="votePost(1829190,&#39;Bury&#39;)"> 
+		<span class="burynum" id="bury_count">1</span>
+	</div>
+	<div class="clear"></div>	
+	<div class="diggword" id="digg_tips">
+    (请您对文章做出评价)
+    </div>	
+</div>
+</div>
+        <div class="clear"></div>
+        <div id="post_next_prev"><a href="http://www.cnblogs.com/leoo2sk/archive/2010/07/22/estimate-by-linear-regression-method.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/leoo2sk/archive/2010/07/22/estimate-by-linear-regression-method.html" title="发布于2010-07-22 18:46">利用简单的一元线性回归分析估计软件项目开发时间</a><br><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/18/bayes-network.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/18/bayes-network.html" title="发布于2010-09-18 22:50">算法杂货铺——分类算法之贝叶斯网络(Bayesian networks)</a><br></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        <li class="icon_cat" id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/leoo2sk/category/273456.html">[11]数据挖掘</a></li>
+        <li class="icon_bullet" id="EntryTag">标签: <a href="http://www.cnblogs.com/leoo2sk/tag/%E7%AE%97%E6%B3%95/">算法</a>, <a href="http://www.cnblogs.com/leoo2sk/tag/%E6%95%B0%E6%8D%AE%E6%8C%96%E6%8E%98/">数据挖掘</a>, <a href="http://www.cnblogs.com/leoo2sk/tag/%E8%B4%9D%E5%8F%B6%E6%96%AF/">贝叶斯</a>, <a href="http://www.cnblogs.com/leoo2sk/tag/%E5%88%86%E7%B1%BB/">分类</a></li>
+    </ul>
+</div>
+<script type="text/javascript">var allowComments=true,isLogined=false,cb_blogId=35418,cb_entryId=1829190,cb_blogApp=currentBlogApp,cb_blogUserGuid='db33420b-63cf-dd11-9e4d-001cf0cd104b',cb_entryCreatedDate='2010/9/17 13:09:00';loadViewCount(cb_entryId);</script>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<a class="addcomment" href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#comment_tip">Add your comment</a>
+<h3 id="comments"></h3>
+<div class="feedbackNoItems"></div>
+
+
+<ol class="commentlist" id="commentList">	
+
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1918974" class="layer">#1楼</a><a name="1918974" id="comment_anchor_1918974"></a></cite> <a id="a_comment_author_1918974" href="http://www.cnblogs.com/gsanidt/" target="_blank">Gsanidt</a> <a href="http://msg.cnblogs.com/send/Gsanidt" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-17 13:21</span></small>
+			</h5>
+			<div id="comment_body_1918974" class="blog_comment_body">学习了....</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1918974,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1918974,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1918974_avatar" style="display:none;">http://pic.cnblogs.com/face/u48185.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1918985" class="layer">#2楼</a><a name="1918985" id="comment_anchor_1918985"></a></cite> <a id="a_comment_author_1918985" href="http://www.cnblogs.com/matador/" target="_blank">Andrew Liu</a> <a href="http://msg.cnblogs.com/send/Andrew%20Liu" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-17 13:40</span></small>
+			</h5>
+			<div id="comment_body_1918985" class="blog_comment_body">真不错，讲得很清晰！多谢</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1918985,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1918985,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1918985_avatar" style="display:none;">http://pic.cnblogs.com/face/u54484.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1919001" class="layer">#3楼</a><a name="1919001" id="comment_anchor_1919001"></a></cite> <a id="a_comment_author_1919001" href="http://home.cnblogs.com/u/159683/" target="_blank">msystem</a> <a href="http://msg.cnblogs.com/send/msystem" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-17 13:53</span></small>
+			</h5>
+			<div id="comment_body_1919001" class="blog_comment_body">不错，期待后续文章</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1919001,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1919001,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1919021" class="layer">#4楼</a><a name="1919021" id="comment_anchor_1919021"></a></cite> <a id="a_comment_author_1919021" href="http://www.cnblogs.com/begtostudy/" target="_blank">白途思</a> <a href="http://msg.cnblogs.com/send/%E7%99%BD%E9%80%94%E6%80%9D" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-17 14:23</span></small>
+			</h5>
+			<div id="comment_body_1919021" class="blog_comment_body">厉害！学习了。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1919021,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1919021,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1919021_avatar" style="display:none;">http://pic.cnblogs.com/face/u35709.jpg?id=14161207</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1919041" class="layer">#5楼</a><a name="1919041" id="comment_anchor_1919041"></a></cite> <a id="a_comment_author_1919041" href="http://www.cnblogs.com/binarytree/" target="_blank">二叉树</a> <a href="http://msg.cnblogs.com/send/%E4%BA%8C%E5%8F%89%E6%A0%91" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-17 14:44</span></small>
+			</h5>
+			<div id="comment_body_1919041" class="blog_comment_body">期待后续文章。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1919041,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1919041,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1919324" class="layer">#6楼</a><a name="1919324" id="comment_anchor_1919324"></a></cite> <a id="a_comment_author_1919324" href="http://www.cnblogs.com/fanweixiao/" target="_blank">new 维生素C.net()</a> <a href="http://msg.cnblogs.com/send/new%20%E7%BB%B4%E7%94%9F%E7%B4%A0C.net%28%29" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-17 18:18</span></small>
+			</h5>
+			<div id="comment_body_1919324" class="blog_comment_body">虽然没彻底看懂,但学到不少东西,顶!</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1919324,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1919324,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1919324_avatar" style="display:none;">http://pic.cnblogs.com/face/u30872.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920082" class="layer">#7楼</a><a name="1920082" id="comment_anchor_1920082"></a></cite> <a id="a_comment_author_1920082" href="http://www.cnblogs.com/LeftNotEasy/" target="_blank">LeftNotEasy</a> <a href="http://msg.cnblogs.com/send/LeftNotEasy" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-18 22:34</span></small>
+			</h5>
+			<div id="comment_body_1920082" class="blog_comment_body">大赞楼主分享，个人提一点建议啊，最近也在看统计学习的一些内容：<br>1. naive bayes算法还是有一定局限性的，主要是nb假定了features之间是独立分布的，在文章中的几个特征显然不是独立分布的，这样计算出来的分类器效果就不那么好了。<br>2. 对于文章中的例子有一点不太合适的地方，对于几个features的取值分布有了一个假设，不知道这个是不是按照高斯分布算出来的，这样给定会造成features的分布由高斯分布变成一个阶段函数了。<br>3. 对文章中的例子对于nb算法可能有不太合适的地方，我觉得decision tree可能会比较好，不需要features的分布，对于连续量也比较好处理。<br>希望楼主写出更多更好的文章：）</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1920082,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1920082,&#39;Bury&#39;,this)">反对(1)</a></div><span id="comment_1920082_avatar" style="display:none;">http://pic.cnblogs.com/face/u89123.png</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920106" class="layer">#8楼</a><a name="1920106" id="comment_anchor_1920106"></a>[<span class="louzhu">楼主</span>]</cite> <a id="a_comment_author_1920106" href="http://www.cnblogs.com/leoo2sk/" target="_blank">T2噬菌体</a> <a href="http://msg.cnblogs.com/send/T2%E5%99%AC%E8%8F%8C%E4%BD%93" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-18 23:01</span></small>
+			</h5>
+			<div id="comment_body_1920106" class="blog_comment_body"><fieldset class="comment_quote"><legend><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920082" title="查看引用原文">引用</a></legend>LeftNotEasy：<br>大赞楼主分享，个人提一点建议啊，最近也在看统计学习的一些内容：<br>1. naive bayes算法还是有一定局限性的，主要是nb假定了features之间是独立分布的，在文章中的几个特征显然不是独立分布的，这样计算出来的分类器效果就不那么好了。<br>2. 对于文章中的例子有一点不太合适的地方，对于几个features的取值分布有了一个假设，不知道这个是不是按照高斯分布算出来的，这样给定会造成features的分布由高斯分布变成一个阶段函数了。<br>3. 对文章中的例子对于nb算法可能有不太合适的地方，我觉得decision tree可能会比较好，不需要features的分布，对于连续量也比较好处理。<br>希望楼主写出更多更好的文章：）</fieldset><br>非常感谢您的回复，您说的很有道理，几个features确实不是独立的，这里做了这个不合理的假设是为了介绍nb，我在后面文章中也提到了这点。至于features的取值分布是我瞎编的^_^，虽然我曾实际做过类似分析，但数据是某个公司的，具有保密性，不能直接写出来。另外decision tree我准备在下篇文章里写，还会沿用这个例子。多谢关注！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1920106,&#39;Digg&#39;,this)">支持(2)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1920106,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1920106_avatar" style="display:none;">http://pic.cnblogs.com/face/u31860.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920139" class="layer">#9楼</a><a name="1920139" id="comment_anchor_1920139"></a></cite> <a id="a_comment_author_1920139" href="http://www.cnblogs.com/LeftNotEasy/" target="_blank">LeftNotEasy</a> <a href="http://msg.cnblogs.com/send/LeftNotEasy" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-18 23:59</span></small>
+			</h5>
+			<div id="comment_body_1920139" class="blog_comment_body"><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920106" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,1920106);">@</a>EricZhang(T2噬菌体)<br>呵呵，持楼主加油 :-D<br>另外分享一个不错的网上的数据源： <a href="http://archive.ics.uci.edu/ml/" target="_blank">http://archive.ics.uci.edu/ml/</a><br>里面有不少数据可以跑跑算法测试的</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1920139,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1920139,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1920139_avatar" style="display:none;">http://pic.cnblogs.com/face/u89123.png</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920295" class="layer">#10楼</a><a name="1920295" id="comment_anchor_1920295"></a>[<span class="louzhu">楼主</span>]</cite> <a id="a_comment_author_1920295" href="http://www.cnblogs.com/leoo2sk/" target="_blank">T2噬菌体</a> <a href="http://msg.cnblogs.com/send/T2%E5%99%AC%E8%8F%8C%E4%BD%93" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-09-19 09:42</span></small>
+			</h5>
+			<div id="comment_body_1920295" class="blog_comment_body"><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920139" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,1920139);">@</a>LeftNotEasy<br>多谢您分享的数据源网站</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1920295,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1920295,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1920295_avatar" style="display:none;">http://pic.cnblogs.com/face/u31860.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1935650" class="layer">#11楼</a><a name="1935650" id="comment_anchor_1935650"></a></cite> <a id="ctl00_CommentList_NameLink_10" target="_blank">neverling[未注册用户]</a><small> <span class="comment_date">2010-10-15 17:24</span></small>
+			</h5>
+			<div id="comment_body_1935650" class="blog_comment_body">问问题：如果要鉴别的少一个属性呢，例：日志数量与注册天数的比率为0.1。其他属性由于各种问题缺少了，该怎样计算呢？</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1935975" class="layer">#12楼</a><a name="1935975" id="comment_anchor_1935975"></a>[<span class="louzhu">楼主</span>]</cite> <a id="a_comment_author_1935975" href="http://www.cnblogs.com/leoo2sk/" target="_blank">T2噬菌体</a> <a href="http://msg.cnblogs.com/send/T2%E5%99%AC%E8%8F%8C%E4%BD%93" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-10-16 10:42</span></small>
+			</h5>
+			<div id="comment_body_1935975" class="blog_comment_body"><fieldset class="comment_quote"><legend><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1935650" title="查看引用原文">引用</a></legend>neverling：问问题：如果要鉴别的少一个属性呢，例：日志数量与注册天数的比率为0.1。其他属性由于各种问题缺少了，该怎样计算呢？</fieldset><br>不好意思，我没有看懂您的意思。可以详细表述一下吗</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1935975,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1935975,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1935975_avatar" style="display:none;">http://pic.cnblogs.com/face/u31860.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1959667" class="layer">#13楼</a><a name="1959667" id="comment_anchor_1959667"></a></cite> <a id="ctl00_CommentList_NameLink_12" target="_blank">adventure[未注册用户]</a><small> <span class="comment_date">2010-11-13 12:42</span></small>
+			</h5>
+			<div id="comment_body_1959667" class="blog_comment_body">写的很好！顶！</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1971018" class="layer">#14楼</a><a name="1971018" id="comment_anchor_1971018"></a></cite> <a id="ctl00_CommentList_NameLink_13" target="_blank">ydiok[未注册用户]</a><small> <span class="comment_date">2010-11-28 17:09</span></small>
+			</h5>
+			<div id="comment_body_1971018" class="blog_comment_body">我想问个问题，计算后验概率的时候，前验概率乘的到底是条件概率还是条件概率密度？</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1971156" class="layer">#15楼</a><a name="1971156" id="comment_anchor_1971156"></a>[<span class="louzhu">楼主</span>]</cite> <a id="a_comment_author_1971156" href="http://www.cnblogs.com/leoo2sk/" target="_blank">T2噬菌体</a> <a href="http://msg.cnblogs.com/send/T2%E5%99%AC%E8%8F%8C%E4%BD%93" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-11-28 21:58</span></small>
+			</h5>
+			<div id="comment_body_1971156" class="blog_comment_body"><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1971018" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,1971018);">@</a>ydiok<br>看是离散型还是连续型</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1971156,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1971156,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1971156_avatar" style="display:none;">http://pic.cnblogs.com/face/u31860.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1972192" class="layer">#16楼</a><a name="1972192" id="comment_anchor_1972192"></a></cite> <a id="ctl00_CommentList_NameLink_15" target="_blank">ydiok[未注册用户]</a><small> <span class="comment_date">2010-11-29 21:52</span></small>
+			</h5>
+			<div id="comment_body_1972192" class="blog_comment_body">谢谢回复，我弄清楚了，原来离散的是概率，连续的是近似成概率密度。</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1974328" class="layer">#17楼</a><a name="1974328" id="comment_anchor_1974328"></a></cite> <a id="ctl00_CommentList_NameLink_16" target="_blank">该昵称被占用[未注册用户]</a><small> <span class="comment_date">2010-12-01 15:58</span></small>
+			</h5>
+			<div id="comment_body_1974328" class="blog_comment_body">你好，问下，编辑函数的时候怎么判断数据时离散的还是连续的，如果是连续的怎么求类条件概率密度，得先假设服从高斯分布之类的吗？谢谢楼主</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1974423" class="layer">#18楼</a><a name="1974423" id="comment_anchor_1974423"></a>[<span class="louzhu">楼主</span>]</cite> <a id="a_comment_author_1974423" href="http://www.cnblogs.com/leoo2sk/" target="_blank">T2噬菌体</a> <a href="http://msg.cnblogs.com/send/T2%E5%99%AC%E8%8F%8C%E4%BD%93" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-12-01 16:56</span></small>
+			</h5>
+			<div id="comment_body_1974423" class="blog_comment_body"><fieldset class="comment_quote"><legend><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1974328" title="查看引用原文">引用</a></legend>该昵称被占用：你好，问下，编辑函数的时候怎么判断数据时离散的还是连续的，如果是连续的怎么求类条件概率密度，得先假设服从高斯分布之类的吗？谢谢楼主</fieldset><br>离散还是连续是根据随机变量来的，就是看随机变量是离散还是连续。连续的情况一般假设服从高斯分布，其依据是中心极限定理，当然也可以用统计分析方法估计分布函数，那样会更好。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1974423,&#39;Digg&#39;,this)">支持(1)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1974423,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_1974423_avatar" style="display:none;">http://pic.cnblogs.com/face/u31860.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1982029" class="layer">#19楼</a><a name="1982029" id="comment_anchor_1982029"></a></cite> <a id="a_comment_author_1982029" href="http://home.cnblogs.com/u/222975/" target="_blank">该昵称被占用</a> <a href="http://msg.cnblogs.com/send/%E8%AF%A5%E6%98%B5%E7%A7%B0%E8%A2%AB%E5%8D%A0%E7%94%A8" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2010-12-09 09:13</span></small>
+			</h5>
+			<div id="comment_body_1982029" class="blog_comment_body">谢谢楼主，我一般遇到的数据都不是离散的，而且是多维的，所以不清楚具体的该如何求类条件概率。对于朴素贝叶斯的流程我明白了，就是理解不了具体细节。楼主给个例子或者告诉俺份详细的编程指导，或者。。。。。发给俺一份简单的代码。。。多谢楼主，俺邮箱是：479793782@qq.com</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(1982029,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(1982029,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2035127" class="layer">#20楼</a><a name="2035127" id="comment_anchor_2035127"></a></cite> <a id="a_comment_author_2035127" href="http://www.cnblogs.com/hpghy123456/" target="_blank">水人</a> <a href="http://msg.cnblogs.com/send/%E6%B0%B4%E4%BA%BA" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2011-02-28 15:58</span></small>
+			</h5>
+			<div id="comment_body_2035127" class="blog_comment_body">顶一下</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2035127,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2035127,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2042005" class="layer">#21楼</a><a name="2042005" id="comment_anchor_2042005"></a></cite> <a id="ctl00_CommentList_NameLink_20" target="_blank">成追忆[未注册用户]</a><small> <span class="comment_date">2011-03-09 09:12</span></small>
+			</h5>
+			<div id="comment_body_2042005" class="blog_comment_body">您好，看了您的文章，我很受益。最近编了一个朴素贝叶斯分类器，用于给图像分类。训练集是4500图像，测试集是500图像，每个图像有48维特征向量。 在训练阶段，求条件概率密度的时候，我将每一类包含的图像的特征向量按照正态分布公式求得之后，将48维的特征向量相乘，得到最后的该类的条件概率密度。但是得到的每类条件概率密度很大，举例来说第一类的条件该类密度值为1.3*10^37,请问程序是否在哪里出现了问题？</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2159795" class="layer">#22楼</a><a name="2159795" id="comment_anchor_2159795"></a></cite> <a id="a_comment_author_2159795" href="http://www.cnblogs.com/yuxc/" target="_blank">牛皮糖NewPtone</a> <a href="http://msg.cnblogs.com/send/%E7%89%9B%E7%9A%AE%E7%B3%96NewPtone" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2011-07-25 10:40</span></small>
+			</h5>
+			<div id="comment_body_2159795" class="blog_comment_body">此处存在笔误，应改为：<br>P(C=0)=8900/10000=0.89<br>P(C=1)=1100/10000=0.11<br><br>楼主的排版看得很舒服</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2159795,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2159795,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2159795_avatar" style="display:none;">http://pic.cnblogs.com/face/288756/20140427165049.png</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2195194" class="layer">#23楼</a><a name="2195194" id="comment_anchor_2195194"></a></cite> <a id="a_comment_author_2195194" href="http://home.cnblogs.com/u/125647/" target="_blank">林风琦</a> <a href="http://msg.cnblogs.com/send/%E6%9E%97%E9%A3%8E%E7%90%A6" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2011-09-08 11:06</span></small>
+			</h5>
+			<div id="comment_body_2195194" class="blog_comment_body">写的太好了，顶楼主</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2195194,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2195194,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2195234" class="layer">#24楼</a><a name="2195234" id="comment_anchor_2195234"></a></cite> <a id="a_comment_author_2195234" href="http://home.cnblogs.com/u/330752/" target="_blank">oO艺Oo</a> <a href="http://msg.cnblogs.com/send/oO%E8%89%BAOo" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2011-09-08 11:26</span></small>
+			</h5>
+			<div id="comment_body_2195234" class="blog_comment_body">首先感谢楼主将贝叶斯分类讲得这么清晰，但是我这个初学者还是有一个问题搞不清楚，希望楼主能够帮忙讲解一下。<br>以一个例子来问吧，比如我现在要给一组样本数据进行分类。已知的类别是5种，每一种的先验概率都是一样的，即0.2,我的待分类相中的特征属性值（需要注意的是：我的特征属性是同一类，比如都是细胞在一分钟的放电个数，但是这个放电个数值是随机的，我做了50组实验，每一组都会得到一个不同的放电个数值）假定是连续的，已知的类别我也用高斯拟合出来了5个正态分布函数，但是求后验概率的时候，怎么去求类条件概率呢？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2195234,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2195234,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2204964" class="layer">#25楼</a><a name="2204964" id="comment_anchor_2204964"></a></cite> <a id="a_comment_author_2204964" href="http://home.cnblogs.com/u/334580/" target="_blank">Jacky76</a> <a href="http://msg.cnblogs.com/send/Jacky76" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2011-09-22 10:00</span></small>
+			</h5>
+			<div id="comment_body_2204964" class="blog_comment_body">浅显易懂！谢谢！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2204964,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2204964,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2205382" class="layer">#26楼</a><a name="2205382" id="comment_anchor_2205382"></a></cite> <a id="ctl00_CommentList_NameLink_25" target="_blank">folk113[未注册用户]</a><small> <span class="comment_date">2011-09-22 16:28</span></small>
+			</h5>
+			<div id="comment_body_2205382" class="blog_comment_body">博主的文章讲的十分好，可以出书了。现在有个问题找不到答案，就是这人脸头像的特征是怎样划分的，你上面这个例子直接举了个账号真实性的，很明了，人脸检测中的眼、口、鼻、嘴、发线是怎样描述的？</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2223016" class="layer">#27楼</a><a name="2223016" id="comment_anchor_2223016"></a></cite> <a id="ctl00_CommentList_NameLink_26" target="_blank">Filler[未注册用户]</a><small> <span class="comment_date">2011-10-19 14:14</span></small>
+			</h5>
+			<div id="comment_body_2223016" class="blog_comment_body">您好！针对您的NB算法，如果训练集样本中一个特征的特征属性比较多，并且是离散值，我应该怎么将其划分？是简单的分段划分么？谢谢！</div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2529579" class="layer">#28楼</a><a name="2529579" id="comment_anchor_2529579"></a></cite> <a id="a_comment_author_2529579" href="http://www.cnblogs.com/tornadomeet/" target="_blank">tornadomeet</a> <a href="http://msg.cnblogs.com/send/tornadomeet" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2012-11-12 08:45</span></small>
+			</h5>
+			<div id="comment_body_2529579" class="blog_comment_body">通俗易懂，看完后对NBC又理解了不少，谢谢！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2529579,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2529579,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2635710" class="layer">#29楼</a><a name="2635710" id="comment_anchor_2635710"></a></cite> <a id="a_comment_author_2635710" href="http://home.cnblogs.com/u/482072/" target="_blank">ziyou4444</a> <a href="http://msg.cnblogs.com/send/ziyou4444" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2013-03-15 16:49</span></small>
+			</h5>
+			<div id="comment_body_2635710" class="blog_comment_body">楼主写的太好了  我基本上理解了它的原理  我想问下，如何实现它  假设是离散的  能不能有MATLAB实现？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2635710,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2635710,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2649874" class="layer">#30楼</a><a name="2649874" id="comment_anchor_2649874"></a></cite> <a id="a_comment_author_2649874" href="http://home.cnblogs.com/u/461522/" target="_blank">KIKI-Donkey</a> <a href="http://msg.cnblogs.com/send/KIKI-Donkey" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2013-04-04 16:14</span></small>
+			</h5>
+			<div id="comment_body_2649874" class="blog_comment_body">谢谢楼主，朴素贝叶斯的介绍以前也看过，但都讲得不够详细。看了楼主的文章感觉原来并不难。<br>楼主的文章很详细，很实用</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2649874,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2649874,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2653955" class="layer">#31楼</a><a name="2653955" id="comment_anchor_2653955"></a></cite> <a id="a_comment_author_2653955" href="http://home.cnblogs.com/u/515348/" target="_blank">Thinkingwang</a> <a href="http://msg.cnblogs.com/send/Thinkingwang" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2013-04-10 12:05</span></small>
+			</h5>
+			<div id="comment_body_2653955" class="blog_comment_body">"Laplace校准，它的思想非常简单，就是对<b>没类别下</b>所有划分的计数加1"能讲的清楚点吗？到底是给哪个加1？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2653955,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2653955,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2655187" class="layer">#32楼</a><a name="2655187" id="comment_anchor_2655187"></a></cite> <a id="a_comment_author_2655187" href="http://home.cnblogs.com/u/425805/" target="_blank">danxianqiao</a> <a href="http://msg.cnblogs.com/send/danxianqiao" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2013-04-11 15:16</span></small>
+			</h5>
+			<div id="comment_body_2655187" class="blog_comment_body">Laplace校准是不是对每一个分类都加1呢？分子加1，分母加n?</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2655187,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2655187,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2715688" class="layer">#33楼</a><a name="2715688" id="comment_anchor_2715688"></a></cite> <a id="a_comment_author_2715688" href="http://www.cnblogs.com/lijiankou/" target="_blank">lijiankou</a> <a href="http://msg.cnblogs.com/send/lijiankou" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2013-06-28 14:31</span></small>
+			</h5>
+			<div id="comment_body_2715688" class="blog_comment_body">正在学习朴素贝叶斯，写得很好</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2715688,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2715688,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2843006" class="layer">#34楼</a><a name="2843006" id="comment_anchor_2843006"></a></cite> <a id="a_comment_author_2843006" href="http://www.cnblogs.com/johnnyflute/" target="_blank">johnny_HITWH</a> <a href="http://msg.cnblogs.com/send/johnny_HITWH" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2013-12-23 17:04</span></small>
+			</h5>
+			<div id="comment_body_2843006" class="blog_comment_body">算法不对吧，为什么分类器训练的时候要算条件概率，这一步不应该放在应用阶段吗？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2843006,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2843006,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2843006_avatar" style="display:none;">http://pic.cnblogs.com/face/u258423.jpg</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2944389" class="layer">#35楼</a><a name="2944389" id="comment_anchor_2944389"></a></cite> <a id="a_comment_author_2944389" href="http://home.cnblogs.com/u/636159/" target="_blank">scut_fangwz</a> <a href="http://msg.cnblogs.com/send/scut_fangwz" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2014-05-22 15:50</span></small>
+			</h5>
+			<div id="comment_body_2944389" class="blog_comment_body">通熟易懂，赞个</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2944389,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2944389,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2981959" class="layer">#36楼</a><a name="2981959" id="comment_anchor_2981959"></a></cite> <a id="a_comment_author_2981959" href="http://www.cnblogs.com/XBWer/" target="_blank">XBWer</a> <a href="http://msg.cnblogs.com/send/XBWer" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2014-07-11 23:36</span></small>
+			</h5>
+			<div id="comment_body_2981959" class="blog_comment_body">写的真好！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2981959,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2981959,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2981959_avatar" style="display:none;">http://pic.cnblogs.com/face/405927/20160330171654.png</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#2985255" class="layer">#37楼</a><a name="2985255" id="comment_anchor_2985255"></a></cite> <a id="a_comment_author_2985255" href="http://home.cnblogs.com/u/650904/" target="_blank">浪里小王八</a> <a href="http://msg.cnblogs.com/send/%E6%B5%AA%E9%87%8C%E5%B0%8F%E7%8E%8B%E5%85%AB" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2014-07-15 13:38</span></small>
+			</h5>
+			<div id="comment_body_2985255" class="blog_comment_body">十分感谢楼主，讲解的很精彩！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2985255,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2985255,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3022373" class="layer">#38楼</a><a name="3022373" id="comment_anchor_3022373"></a></cite> <a id="a_comment_author_3022373" href="http://home.cnblogs.com/u/669462/" target="_blank">kkblack</a> <a href="http://msg.cnblogs.com/send/kkblack" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2014-09-03 14:20</span></small>
+			</h5>
+			<div id="comment_body_3022373" class="blog_comment_body">就这个简单实例来说，最基本的逻辑都有问题，特地申请帐号揭发，去学概率论把</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3022373,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3022373,&#39;Bury&#39;,this)">反对(1)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3034091" class="layer">#39楼</a><a name="3034091" id="comment_anchor_3034091"></a></cite> <a id="a_comment_author_3034091" href="http://www.cnblogs.com/diyunpeng/" target="_blank">规格严格-功夫到家</a> <a href="http://msg.cnblogs.com/send/%E8%A7%84%E6%A0%BC%E4%B8%A5%E6%A0%BC-%E5%8A%9F%E5%A4%AB%E5%88%B0%E5%AE%B6" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2014-09-24 22:53</span></small>
+			</h5>
+			<div id="comment_body_3034091" class="blog_comment_body">呵呵，写的很好~</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3034091,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3034091,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3151716" class="layer">#40楼</a><a name="3151716" id="comment_anchor_3151716"></a></cite> <a id="a_comment_author_3151716" href="http://home.cnblogs.com/u/427029/" target="_blank">去上大学</a> <a href="http://msg.cnblogs.com/send/%E5%8E%BB%E4%B8%8A%E5%A4%A7%E5%AD%A6" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2015-03-29 20:43</span></small>
+			</h5>
+			<div id="comment_body_3151716" class="blog_comment_body">讲的很好，1024个赞<br><br>小白开始要学习数据挖掘了，以后就常来你这串门了啊~~</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3151716,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3151716,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3176692" class="layer">#41楼</a><a name="3176692" id="comment_anchor_3176692"></a></cite> <a id="a_comment_author_3176692" href="http://home.cnblogs.com/u/239722/" target="_blank">csf8898</a> <a href="http://msg.cnblogs.com/send/csf8898" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2015-05-05 20:13</span></small>
+			</h5>
+			<div id="comment_body_3176692" class="blog_comment_body"><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#1920082" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,1920082);">@</a>LeftNotEasy<br>朴素贝叶斯分类应用在文本分类上还是很牛b的</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3176692,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3176692,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3196912" class="layer">#42楼</a><a name="3196912" id="comment_anchor_3196912"></a></cite> <a id="a_comment_author_3196912" href="http://www.cnblogs.com/pacoson/" target="_blank">PacosonSWJTU</a> <a href="http://msg.cnblogs.com/send/PacosonSWJTU" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2015-05-30 19:37</span></small>
+			</h5>
+			<div id="comment_body_3196912" class="blog_comment_body">非常的好，写的！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3196912,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3196912,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3196912_avatar" style="display:none;">http://pic.cnblogs.com/face/443653/20140115225854.png</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3206708" class="layer">#43楼</a><a name="3206708" id="comment_anchor_3206708"></a></cite> <a id="a_comment_author_3206708" href="http://www.cnblogs.com/likehua/" target="_blank">李克华</a> <a href="http://msg.cnblogs.com/send/%E6%9D%8E%E5%85%8B%E5%8D%8E" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2015-06-12 10:01</span></small>
+			</h5>
+			<div id="comment_body_3206708" class="blog_comment_body">写的很不错，估计楼主目前应该是某大牛了吧</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3206708,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3206708,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3213108" class="layer">#44楼</a><a name="3213108" id="comment_anchor_3213108"></a></cite> <a id="a_comment_author_3213108" href="http://www.cnblogs.com/qingdujun/" target="_blank">卿笃军</a> <a href="http://msg.cnblogs.com/send/%E5%8D%BF%E7%AC%83%E5%86%9B" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2015-06-22 22:30</span></small>
+			</h5>
+			<div id="comment_body_3213108" class="blog_comment_body">下面给出划分：a1：{a&lt;=0.05, 0.05&lt;a&lt;0.2, a&gt;=0.2}，a1：{a&lt;=0.1, 0.1&lt;a&lt;0.8, a&gt;=0.8}，a3：{a=0（不是）,a=1（是）}。<br><br>博主,该处有手误。还有就是连续时，高斯分布这是怎么算？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3213108,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3213108,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3213108_avatar" style="display:none;">http://pic.cnblogs.com/face/575096/20131017193124.png</span>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3282036" class="layer">#45楼</a><a name="3282036" id="comment_anchor_3282036"></a></cite> <a id="a_comment_author_3282036" href="http://www.cnblogs.com/aps236/" target="_blank">aps236</a> <a href="http://msg.cnblogs.com/send/aps236" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2015-10-10 16:53</span></small>
+			</h5>
+			<div id="comment_body_3282036" class="blog_comment_body">写得真好，通俗易懂，学习了。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3282036,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3282036,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3327689" class="layer">#46楼</a><a name="3327689" id="comment_anchor_3327689"></a></cite> <a id="a_comment_author_3327689" href="http://home.cnblogs.com/u/857840/" target="_blank">奥兹</a> <a href="http://msg.cnblogs.com/send/%E5%A5%A5%E5%85%B9" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2015-12-15 17:17</span></small>
+			</h5>
+			<div id="comment_body_3327689" class="blog_comment_body">学习了，楼主讲的好</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3327689,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3327689,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+		<li class="alt">
+			<h5>
+				<cite><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#3404996" class="layer">#47楼</a><a name="3404996" id="comment_anchor_3404996"></a><span id="comment-maxId" style="display:none;">3404996</span><span id="comment-maxDate" style="display:none;">2016/4/11 12:52:30</span></cite> <a id="a_comment_author_3404996" href="http://www.cnblogs.com/pengkunfan/" target="_blank">midu</a> <a href="http://msg.cnblogs.com/send/midu" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><small> <span class="comment_date">2016-04-11 12:52</span></small>
+			</h5>
+			<div id="comment_body_3404996" class="blog_comment_body">请问下楼主，第四个计算似然函数概率怎么得来的结果？<br>” 4、计算每个类别条件下各个特征属性划分的频率“<br>p(a1&lt;0.05|c=0)=0.3是怎么计算的？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3404996,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3404996,&#39;Bury&#39;,this)">反对(0)</a></div>
+			<div class="opt_comment"><span class="comment_actions"></span></div>
+		</li>
+	
+</ol>
+
+<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/1829190.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="http://www.rongcloud.cn/" target="_blank">【推荐】融云即时通讯云－豆果美食、Faceu等亿级APP都在用</a><br><a href="https://bce.baidu.com/event/promotion-march/index.html?t=cp:online-media|pf:pc|pp:mar|pu:244" target="_blank">【推荐】百度开放云－三月超低价促销</a><br></div>
+<div id="opt_under_post"></div>
+<div id="ad_c1" class="c_ad_block"><a href="http://www.gcpowertools.com.cn/products/componentone.htm?utm_source=cnblogs&amp;utm_medium=blogpage&amp;utm_term=bottom&amp;utm_content=C1&amp;utm_campaign=community" target="_blank"><img width="300" height="250" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/24442-20160331135220551-2117417331.gif" alt=""></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/543179/" target="_blank">陈琪内部分享：美丽说蘑菇街组梯队，打破货架式电商局限，淘世界确认合并</a><br> ·  <a href="http://news.cnblogs.com/n/543178/" target="_blank">谷歌是时候推出新款平板来对抗苹果iPad了</a><br> ·  <a href="http://news.cnblogs.com/n/543177/" target="_blank">iOS版微软Word Flow输入法开测：先来看截图</a><br> ·  <a href="http://news.cnblogs.com/n/543176/" target="_blank">公司上市了，老板破产了！一个深圳新三板“僵尸层”老板的年终总结</a><br> ·  <a href="http://news.cnblogs.com/n/543175/" target="_blank">三星专利揭示其将发布带显示和拍照功能的智能隐形眼镜</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="ad_c2" class="c_ad_block"><a href="https://www.jpush.cn/?from=cnblogs01" target="_blank"><img width="468" height="60" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/24442-20160307140747632-1210035054.jpg" alt=""></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/542462/" target="_blank">我是一个线程</a><br> ·  <a href="http://kb.cnblogs.com/page/541862/" target="_blank">为什么未来是全栈工程师的世界？</a><br> ·  <a href="http://kb.cnblogs.com/page/541805/" target="_blank">程序bug导致了天大的损失，要枪毙程序猿吗？</a><br> ·  <a href="http://kb.cnblogs.com/page/541230/" target="_blank">如何运维千台以上游戏云服务器</a><br> ·  <a href="http://kb.cnblogs.com/page/539160/" target="_blank">架构漫谈（一）：什么是架构？</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+$(function () {
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);    
+});
+</script>
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            
+<div id="about">
+<div>
+<h2 id="about_title">About</h2>
+<div id="about_body">
+<div id="blog-news"><p>博客已迁移到<a href="http://blog.codinglabs.org/?utm_source=cnblogs&amp;utm_medium=banner">http://blog.codinglabs.org</a>，欢迎访问。博客园不再更新。</p><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/leoo2sk/">T2噬菌体</a><br>园龄：<a href="http://home.cnblogs.com/u/leoo2sk/" title="入园时间：2008-04-03">8年</a><br>荣誉：<a href="http://www.cnblogs.com/expert/">推荐博客</a><br>粉丝：<a href="http://home.cnblogs.com/u/leoo2sk/followers/">2232</a><br>关注：<a href="http://home.cnblogs.com/u/leoo2sk/followees/">14</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="cnblogs.UserManager.FollowBlogger(&#39;db33420b-63cf-dd11-9e4d-001cf0cd104b&#39;)">+加关注</a></div></div></div>
+<script type="text/javascript">loadBlogNews();</script>
+</div>
+</div>
+</div>
+
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            
+<div id="mySearchWrapper">
+    <div id="mySearch">
+        <input type="image" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/btnsearch.gif" id="btnZzk" class="submit" onclick="zzk_go();return false;">
+        <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword"></label>
+    </div>
+</div>
+
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            <div id="side-recent-comments">
+        <h2>最新评论</h2>
+        <ul class="voice">
+                <li>
+                    <a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/naive-bayesian-classifier.html#3404996">Re:算法杂货铺——分类算法之朴素贝叶斯分类(Naive Bayesian classification)</a>
+                    <br>
+                    <a class="child" href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/naive-bayesian-classifier.html#3404996">
+                        请问下楼主，第四个计算似然函数概率怎么得来的结果？<br>” 4、计算每个类别条件下各个特征属性划分的频率“<br>p(a1&lt;0.05|c=0)=0.3是怎么计算的？
+                        -- midu
+                    </a>
+                </li>
+                <li>
+                    <a href="http://www.cnblogs.com/leoo2sk/archive/2009/06/17/di-and-ioc.html#3403919">Re:依赖注入那些事儿</a>
+                    <br>
+                    <a class="child" href="http://www.cnblogs.com/leoo2sk/archive/2009/06/17/di-and-ioc.html#3403919">
+                        好文，看过好多依赖注入的文章，就这篇看完有点豁然开朗
+                        -- Allen-Yang
+                    </a>
+                </li>
+                <li>
+                    <a href="http://www.cnblogs.com/leoo2sk/archive/2008/04/10/1146447.html#3372898">Re:面向接口编程详解（一）——思想基础</a>
+                    <br>
+                    <a class="child" href="http://www.cnblogs.com/leoo2sk/archive/2008/04/10/1146447.html#3372898">
+                        一直对面向接口编程的g概念比较模糊，读楼主的文章，通俗易懂，非常适合初学者。多谢楼主！！
+                        -- iwin12021
+                    </a>
+                </li>
+                <li>
+                    <a href="http://www.cnblogs.com/leoo2sk/archive/2009/06/17/di-and-ioc.html#3365664">Re:依赖注入那些事儿</a>
+                    <br>
+                    <a class="child" href="http://www.cnblogs.com/leoo2sk/archive/2009/06/17/di-and-ioc.html#3365664">
+                        喜欢楼主叙事的风格，写的很好，赞一个。很有故事性，赞一个
+                        -- Strony
+                    </a>
+                </li>
+                <li>
+                    <a href="http://www.cnblogs.com/leoo2sk/archive/2009/06/17/di-and-ioc.html#3353885">Re:依赖注入那些事儿</a>
+                    <br>
+                    <a class="child" href="http://www.cnblogs.com/leoo2sk/archive/2009/06/17/di-and-ioc.html#3353885">
+                        挺好的文章
+                        -- 不乱于心
+                    </a>
+                </li>
+        </ul>
+    </div></div>
+            <div id="sideRight">
+            <div id="side-archives">
+        <h2>随笔档案</h2>
+        <ul class="date">
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2012/05.html">2012年5月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/11.html">2011年11月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/10.html">2011年10月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/08.html">2011年8月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/07.html">2011年7月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/06.html">2011年6月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/04.html">2011年4月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/03.html">2011年3月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/02.html">2011年2月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/01.html">2011年1月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/12.html">2010年12月(4)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/11.html">2010年11月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/10.html">2010年10月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09.html">2010年9月(5)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/07.html">2010年7月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/01.html">2010年1月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/12.html">2009年12月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/10.html">2009年10月(3)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/06.html">2009年6月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/05.html">2009年5月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/04.html">2009年4月(3)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/03.html">2009年3月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/02.html">2009年2月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/12.html">2008年12月(6)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/11.html">2008年11月(7)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/10.html">2008年10月(3)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/09.html">2008年9月(2)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/08.html">2008年8月(1)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/07.html">2008年7月(9)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/06.html">2008年6月(7)</a></li>
+                <li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/04.html">2008年4月(3)</a></li>
+        </ul>
+    </div></div>
+            <div id="sideLeft">
+            <div id="side-categories">
+        <h2>随笔分类</h2>
+        <ul class="folder">
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/167190.html">[01].NET(14)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/167191.html">[02]ASP.NET AJAX(7)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/167192.html">[03]ASP.NET MVC(8)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/273963.html">[04]PHP(5)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/167193.html">[05]UML(2)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/273457.html">[06]unix&amp;linux(2)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/167194.html">[07]面向对象技术(11)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/271700.html">[08]软件过程及软件项目管理(3)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/216107.html">[09]软件架构(7)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/167196.html">[10]设计模式(1)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/273456.html">[11]数据挖掘(4)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/167195.html">[12]算法分析与设计(6)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/275540.html">[13]工具发布(1)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/275938.html">[14]Web前端(5)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/309712.html">[15]数据库(1)</a>
+                </li>
+                <li>
+                    
+                    <a href="http://www.cnblogs.com/leoo2sk/category/326075.html">[16]Nginx&amp;Apache(1)</a>
+                </li>
+        </ul>
+    </div><div id="side-top-posts-custom">
+    <h2>推荐排行榜</h2>
+    <div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/06/17/di-and-ioc.html">1. 依赖注入那些事儿(132)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/07/10/mysql-index.html">2. MySQL索引背后的数据结构及算法原理(57)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2009/10/29/1592568.html">3. 细说业务逻辑（前篇）(53)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/10/27/1320285.html">4. ASP.NET MVC案例教程（基于ASP.NET MVC beta）——第一篇：准备工作(50)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/10/01/hash-and-encrypt.html">5. 哈希(Hash)与加密(Encrypt)的基本原理、区别及工程应用(37)</a></li></ul></div>
+</div><div id="side-top-posts">
+    <h2>阅读排行榜</h2>
+    <div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/10/27/1320285.html">1. ASP.NET MVC案例教程（基于ASP.NET MVC beta）——第一篇：准备工作(130885)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/naive-bayesian-classifier.html">2. 算法杂货铺——分类算法之朴素贝叶斯分类(Naive Bayesian classification)(126072)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/06/27/write-javascript-with-seajs.html">3. 使用SeaJS实现模块化JavaScript开发(83685)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2008/10/28/1321056.html">4. ASP.NET MVC案例教程（基于ASP.NET MVC beta）——第二篇：第一个页面(79097)</a></li><li><a href="http://www.cnblogs.com/leoo2sk/archive/2011/07/10/mysql-index.html">5. MySQL索引背后的数据结构及算法原理(73587)</a></li></ul></div>
+</div>    
+    
+    
+
+
+</div>
+            
+                <div id="sideContainer"></div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/mvc/blog/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                loadBlogDefaultCalendar();
+                                loadBlogSideBlocks();
+                                var m = window.__blog.sideContainerRendered;
+                                if (m) { m(__$("sideContainer")); }
+                                window.__blog.sidebar.__layout();
+                            }
+                        }
+                    });
+
+                </script>
+            
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            
+<p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright ©2016 T2噬菌体
+</p>
+<p>
+<a href="http://www.cnblogs.com/">博客园</a>
+</p>
+</div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+<!--PageEndHtml Block Begin-->
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-35712773-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<!-- JiaThis Button BEGIN -->
+<script type="text/javascript" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/jiathis_r.js" charset="utf-8"></script><script src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/ckepop.js" charset="utf-8"></script><script src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/ckecenterpop.js" charset="utf-8"></script><script type="text/javascript" src="./算法杂货铺——分类算法之朴素贝叶斯分类_files/plugin.client.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+<!--PageEndHtml Block End-->
+
+
+</body></html>
